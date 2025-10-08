@@ -11,7 +11,8 @@
       "Femt_1.C": "cpp",
       "picoAnalyzerStandalone.C": "cpp",
       "picoAnalyzerStandalone_2.C": "cpp",
-      "test_1.C": "cpp"
+      "test_1.C": "cpp",
+      "test_2.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
