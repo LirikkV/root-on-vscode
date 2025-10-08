@@ -1,0 +1,18 @@
+// {
+//     "C_Cpp.default.includePath": [
+//         "/home/lirikk/root/include/"
+//     ]
+// } 
+
+
+// {
+//   "files.associations": {
+//     "*.C": "cpp"
+//   },
+//   "C_Cpp.default.includePath": [
+//     "/usr/include/root",
+//     "/usr/local/include/root",
+//     "${workspaceFolder}/**"
+//   ],
+//   "C_Cpp.default.compilerPath": "/usr/bin/g++"
+// }
