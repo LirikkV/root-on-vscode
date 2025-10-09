@@ -110,6 +110,9 @@ int main(int argc, char* argv[]) {
   
   // Histogramming
   // Event
+  //-----My histograms for events:
+
+  //-----end of my histograms for events
   TH1F *hRefMult = new TH1F("hRefMult",
 			    "Reference multiplicity;refMult",
 			    500, -0.5, 499.5);
@@ -120,6 +123,9 @@ int main(int argc, char* argv[]) {
 			 140, -70., 70.);
 
   // Track
+  //----- My histograms for track
+
+  //----- End of my histograms for track selection
   TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
 			       "Global track momentum;p (GeV/c)",
 			       100, 0., 1. );
@@ -199,11 +205,20 @@ int main(int argc, char* argv[]) {
 		<< std::endl;
       break;
     }
+
     hRefMult->Fill( event->refMult() );
 
     TVector3 pVtx = event->primaryVertex();
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
+
+    //----- Lirikk's for event selection:
+    double_t R_vertex_cut_max = 2.0; //cm
+    double_t Z_vertex_cut_abs = 40.0;//cm
+    double_t X_vertex = event->mPrimaryVertexX();
+    double_t Y_vertex = event->mPrimaryVertexY();
+    double_t Z_vertex = event->mPrimaryVertexZ();
+    double_t R_vertex = sqrt(X_vertex*X_vertex + Y_vertex*Y_vertex);
 
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
@@ -221,6 +236,12 @@ int main(int argc, char* argv[]) {
       
       if(!picoTrack) continue;
       //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
+
+      //----- Lirikk's event selection:
+      if(R_vertex < R_vertex_cut_max && sqrt(Z_vertex*Z_vertex)<Z_vertex_cut_abs)
+      {
+
+      }//----end of event selection
 
       hGlobalPtot->Fill( picoTrack->gMom().Mag() );
       if( picoTrack->isPrimary() ) {
@@ -317,7 +338,6 @@ int main(int argc, char* argv[]) {
       //std::cout << "EpdHit #[" << (iHit+1) << "/" << nEpdHits << "]"  << std::endl;
       hEpdAdc->Fill( epdHit->adc() );
     }
-
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
   picoReader->Finish();
