@@ -237,9 +237,37 @@ int main(int argc, char* argv[]) {
       if(!picoTrack) continue;
       //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
 
+      //----- Lirikk's for track selection:
+      Int_t nHitsTPC_min = 15;
+      Double_t DCA_max = 3.0;//cm 
+      Double_t p_tot_prim_min = 0.15;//GeV/c
+      Double_t p_tot_prim_max = 1.5;//GeV/c
+      Double_t p_trans_prim_min = 0.15;//GeV/c
+      Double_t p_trans_prim_max = 1.5;//GeV/c
+      Double_t pseudorap_prim_abs = 1.5;
+
+      Int_t nHitsTPC = picoTrack->nHits();
+      Bool_t isPrimaryTrack = picoTrack->isPrimary();
+      //Double_t DCA = picoTrack->gDCA();
+      Double_t X_Momentum = picoTrack->mPMomentumX();
+      Double_t Y_Momentum = picoTrack->mPMomentumY();
+      Double_t Z_Momentum = picoTrack->mPMomentumZ();
+      Double_t p_tot_prim = sqrt((X_Momentum*X_Momentum)+(Y_Momentum*Y_Momentum)+(Z_Momentum*Z_Momentum));
+      Double_t p_trans_prim = sqrt((X_Momentum*X_Momentum)+(Y_Momentum*Y_Momentum)); 
+      Double_t pseudorap_prim = atanh(Z_Momentum/p_tot_prim);
+
       //----- Lirikk's event selection:
       if(R_vertex < R_vertex_cut_max && sqrt(Z_vertex*Z_vertex)<Z_vertex_cut_abs)
       {
+        //----- Lirikk's track selection:
+        if(nHitsTPC>=nHitsTPC_min && isPrimaryTrack && 
+            p_tot_prim_min<p_tot_prim && p_tot_prim<p_tot_prim_max && 
+            p_trans_prim_min<p_trans_prim && p_trans_prim<p_trans_prim_max &&
+            (sqrt(pseudorap_prim*pseudorap_prim)<pseudorap_prim_abs)
+            )
+        {
+          
+        }
 
       }//----end of event selection
 
