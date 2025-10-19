@@ -20,7 +20,7 @@ double F_hyper(double a, double b, double c, double z)
   //second check for special case: 
   else if(0.5<z && z<=1.0 && (c) && !is_abc_int)
   {
-    cout << "c - a - b is not integer"<<endl;
+    //cout << "c - a - b is not integer"<<endl;
     double y = tgamma(c)*tgamma(c-a-b)/(tgamma(c-a)*tgamma(c-b))
                 *F_hyper(a,b,a+b-c+1.,1.-z) 
                 + pow((1.-z),c-a-b) * tgamma(c)*tgamma(a+b-c)/(tgamma(a)*tgamma(b)) 
@@ -29,8 +29,8 @@ double F_hyper(double a, double b, double c, double z)
   }
   else if(z<-0.5)
   {
+    //cout<<"z<0.5"<<endl;
     double y = pow((1-z), -a) * F_hyper(a,c-b,c,z/(z-1));
-    cout<<"z<0.5"<<endl;
     return(y);
   }
   else
@@ -49,35 +49,45 @@ double F_hyper(double a, double b, double c, double z)
       N += 1.0;
       eps = fabs(X_0);
     }
-    cout << "Number of steps: " << N << endl;
+    //cout << "Number of steps: " << N << endl;
     return (Sum);
   }
 }
 
 void Task_1_c()
 {
-  double z = -0.8;
 
   //for "sqrt" function we can use formula (5) if z<-1/2
-  double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
-  double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
+  // double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
+  // double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
 
   //for next "arcsin" function we can use recurrent formula (4) if c-a-b not int
-  double Hyper_arcsin = F_hyper(0.5,0.5,1.5,z*z);
-  double Theor_arcsin = (fabs(z) < DBL_EPSILON) ? 1.0 : asin(z)/z;
+  // double Hyper_arcsin = F_hyper(0.5,0.5,1.5,z*z);
+  // double Theor_arcsin = (fabs(z) < DBL_EPSILON) ? 1.0 : asin(z)/z;
 
   //for "sqrt" function we also can use formula (5) if z<-1/2
+  const double z_min_ln = -0.95;
+  const double z_max_ln = 0.95;
+  const double z_step_ln = 0.1;
+  int N_steps_ln = (int)((z_max_ln-z_min_ln)/z_step_ln) + 1;
+  
+  printf("%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1,1,2,z)", "-ln(1-z)/z", "( eps )");
+  for(int i=0;i<=N_steps_ln;i++)
+  {
+  double z = z_min_ln+i*z_step_ln;
   double Hyper_ln = F_hyper(1.,1.,2.,z);
   double Theor_ln = (fabs(z) < DBL_EPSILON) ? 1.0 : -log(1-z)/z;
+  double eps_ln = fabs((Hyper_ln - Theor_ln)/Theor_ln);
+  
+  printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_ln, Theor_ln, eps_ln);
+  }
 
 
-  printf("%-16s = %20.17f\n", "Hyper sqrt", Hyper_sqrt);
-  printf("%-16s = %20.17f\n", "Exact sqrt", Theor_sqrt);
-  printf("%-16s = %20.17f\n", "Hyper ln", Hyper_ln);
-  printf("%-16s = %20.17f\n", "Exact ln", Theor_ln);
-  printf("%-16s = %20.17f\n", "Hyper arcsin", Hyper_arcsin);
-  printf("%-16s = %20.17f\n", "Exact arcsin", Theor_arcsin);
-  // double eps = fabs((x - y)/y);
+  // printf("%-16s = %20.17f\n", "Hyper sqrt", Hyper_sqrt);
+  // printf("%-16s = %20.17f\n", "Exact sqrt", Theor_sqrt);
+  // printf("%-16s = %20.17f\n", "Hyper arcsin", Hyper_arcsin);
+  // printf("%-16s = %20.17f\n", "Exact arcsin", Theor_arcsin);
+  
   // printf("Eps = %9.1e\n", eps);
   // tgamma(10); rint(); pow(2,3)
 }
