@@ -10,14 +10,23 @@ double F_hyper(double a, double b, double c, double z)
   const double N_break_max = 5000.0;
   const double integer_accuracy = 0.001;
 
-  bool is_abc_not_int = fabs(rint(c - a - b) - (c - a - b)) > integer_accuracy;
+  bool is_abc_int = fabs(rint(c - a - b) - (c - a - b)) < integer_accuracy;
 
   if (fabs(z) > 1)
   {
-    cout << " WARNING! Series does not converge, cause |z| > 1" << endl;
+    cout << "Lirikk's WARNING! Series does not converge, cause |z| > 1" << endl;
     return (NAN);
   }
-  else if (fabs(z) <= 0.5)
+  //second check for special case: 
+  else if(0.5<z && z<=1.0 && (c) && !is_abc_int)
+  {
+    cout << "c - a - b is not integer"<<endl;
+    double y = tgamma(c)*tgamma(c-a-b)/(tgamma(c-a)*tgamma(c-b))*F_hyper(a,b,a+b-c+1.,1-z)+
+                5.0;
+    return (y);
+  }
+
+  else
   {
     double N = 1.0;
 
@@ -33,29 +42,26 @@ double F_hyper(double a, double b, double c, double z)
       N += 1.0;
       eps = fabs(X_0);
     }
-
     cout << "Number of steps: " << N << endl;
     return (Sum);
   }
-  // else if(0.5<z && z<=1.0 && (c) && is_abc_not_int)
-  // {
-  //   cout << "c - a - b not integer"<<endl;
-  //   return (666.666);
-  // }
 }
 
 void Task_1_c()
 {
-  double z = 0.45;
+  double z = 0.6;
 
-  double x = F_hyper(0.5, 1.0, 1.5, -z * z);
-  //printf("Hypergeometriz = %20.17f\n", x);
+  double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
+  double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
 
-  double y = (fabs(z) < DBL_EPSILON) ? 1.0 : atan(z) / z;
-  //printf("Exact = %20.17f\n", y);
+  double Hyper_ln = F_hyper(1.,1.,2.,z);
+  double Theor_ln = (fabs(z) < DBL_EPSILON) ? 1.0 : -log(1-z)/z;
 
-  printf("%-16s = %20.17f\n", "Hypergeometriс", x);
-  printf("%-16s = %20.17f\n", "Exact", y);
+
+  printf("%-16s = %20.17f\n", "Hyper sqrt", Hyper_sqrt);
+  printf("%-16s = %20.17f\n", "Exact sqrt", Theor_sqrt);
+  printf("%-16s = %20.17f\n", "Hyper ln", Hyper_ln);
+  printf("%-16s = %20.17f\n", "Exact ln", Theor_ln);
   // double eps = fabs((x - y)/y);
   // printf("Eps = %9.1e\n", eps);
   // tgamma(10); rint(); pow(2,3)
