@@ -61,17 +61,13 @@ void Task_1_c()
   // double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
   // double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
 
-  //for next "arcsin" function we can use recurrent formula (4) if c-a-b not int
-  // double Hyper_arcsin = F_hyper(0.5,0.5,1.5,z*z);
-  // double Theor_arcsin = (fabs(z) < DBL_EPSILON) ? 1.0 : asin(z)/z;
-
   //for "sqrt" function we also can use formula (5) if z<-1/2
   const double z_min_ln = -0.95;
   const double z_max_ln = 0.95;
   const double z_step_ln = 0.1;
   int N_steps_ln = (int)((z_max_ln-z_min_ln)/z_step_ln) + 1;
   
-  printf("%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1,1,2,z)", "-ln(1-z)/z", "( eps )");
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1,1,2,z)", "-ln(1-z)/z", "( eps )");
   for(int i=0;i<=N_steps_ln;i++)
   {
   double z = z_min_ln+i*z_step_ln;
@@ -82,6 +78,24 @@ void Task_1_c()
   printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_ln, Theor_ln, eps_ln);
   }
 
+  //for next "arcsin" function we can use recurrent formula (4) if c-a-b not int
+
+  const double z_min_asin = 0.05;
+  const double z_max_asin = 0.95;
+  const double z_step_asin = 0.1;
+  int N_steps_asin = (int)((z_max_asin-z_min_asin)/z_step_asin) + 1;
+  
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1,1,2,z)", "-ln(1-z)/z", "( eps )");
+  for(int i=0;i<=N_steps_asin;i++)
+  {
+  double z = z_min_asin+i*z_step_asin;
+  double Hyper_asin = F_hyper(0.5,0.5,1.5,z*z);
+  double Theor_asin = (fabs(z) < DBL_EPSILON) ? 1.0 : asin(z)/z;
+  double eps_asin = fabs((Hyper_asin - Theor_asin)/Theor_asin);
+  
+  printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_asin, Theor_asin, eps_asin);
+  }
+  
 
   // printf("%-16s = %20.17f\n", "Hyper sqrt", Hyper_sqrt);
   // printf("%-16s = %20.17f\n", "Exact sqrt", Theor_sqrt);
