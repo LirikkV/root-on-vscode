@@ -12,13 +12,13 @@ double F_hyper(double a, double b, double c, double z)
 
   bool is_abc_int = fabs(rint(c - a - b) - (c - a - b)) < integer_accuracy;
 
-  if (fabs(z) > 1)
-  {
-    cout << "Lirikk's WARNING! Series does not converge, cause |z| > 1" << endl;
-    return (NAN);
-  }
+  // if (fabs(z) > 1)
+  // {
+  //   cout << "Lirikk's WARNING! Series does not converge, cause |z| > 1" << endl;
+  //   return (NAN);
+  // }
   //second check for special case: 
-  else if(0.5<z && z<=1.0 && (c) && !is_abc_int)
+  if(0.5<z && z<=1.0 && (c) && !is_abc_int)
   {
     //cout << "c - a - b is not integer"<<endl;
     double y = tgamma(c)*tgamma(c-a-b)/(tgamma(c-a)*tgamma(c-b))
@@ -56,11 +56,6 @@ double F_hyper(double a, double b, double c, double z)
 
 void Task_1_c()
 {
-
-  //for "sqrt" function we can use formula (5) if z<-1/2
-  // double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
-  // double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
-
   //for "sqrt" function we also can use formula (5) if z<-1/2
   const double z_min_ln = -0.95;
   const double z_max_ln = 0.95;
@@ -85,7 +80,7 @@ void Task_1_c()
   const double z_step_asin = 0.1;
   int N_steps_asin = (int)((z_max_asin-z_min_asin)/z_step_asin) + 1;
   
-  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1,1,2,z)", "-ln(1-z)/z", "( eps )");
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1/2,1/2,3/2,z)", "-ln(1-z)/z", "( eps )");
   for(int i=0;i<=N_steps_asin;i++)
   {
   double z = z_min_asin+i*z_step_asin;
@@ -96,12 +91,21 @@ void Task_1_c()
   printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_asin, Theor_asin, eps_asin);
   }
   
-
-  // printf("%-16s = %20.17f\n", "Hyper sqrt", Hyper_sqrt);
-  // printf("%-16s = %20.17f\n", "Exact sqrt", Theor_sqrt);
-  // printf("%-16s = %20.17f\n", "Hyper arcsin", Hyper_arcsin);
-  // printf("%-16s = %20.17f\n", "Exact arcsin", Theor_arcsin);
   
-  // printf("Eps = %9.1e\n", eps);
-  // tgamma(10); rint(); pow(2,3)
+  //for "sqrt" function we can use formula (5) if z<-1/2
+  const double z_min_sqrt = 0.0;
+  const double z_max_sqrt = 10.0;
+  const double z_step_sqrt = 0.5;
+  int N_steps_sqrt = (int)((z_max_sqrt-z_min_sqrt)/z_step_sqrt) + 1;
+  
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(-1/4,1/4,1/2,z)", "-ln(1-z)/z", "( eps )");
+  for(int i=0;i<=N_steps_sqrt;i++)
+  {
+  double z = z_min_sqrt+i*z_step_sqrt;
+  double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
+  double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
+  double eps_sqrt = fabs((Hyper_sqrt - Theor_sqrt)/Theor_sqrt);
+  
+  printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_sqrt, Theor_sqrt, eps_sqrt);
+  }
 }
