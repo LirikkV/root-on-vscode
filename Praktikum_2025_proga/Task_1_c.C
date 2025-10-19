@@ -80,7 +80,7 @@ void Task_1_c()
   const double z_step_asin = 0.1;
   int N_steps_asin = (int)((z_max_asin-z_min_asin)/z_step_asin) + 1;
   
-  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1/2,1/2,3/2,z)", "-ln(1-z)/z", "( eps )");
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1/2,1/2,3/2,z)", "asin(z)/z", "( eps )");
   for(int i=0;i<=N_steps_asin;i++)
   {
   double z = z_min_asin+i*z_step_asin;
@@ -93,19 +93,45 @@ void Task_1_c()
   
   
   //for "sqrt" function we can use formula (5) if z<-1/2
-  const double z_min_sqrt = 0.0;
-  const double z_max_sqrt = 10.0;
-  const double z_step_sqrt = 0.5;
-  int N_steps_sqrt = (int)((z_max_sqrt-z_min_sqrt)/z_step_sqrt) + 1;
-  
-  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(-1/4,1/4,1/2,z)", "-ln(1-z)/z", "( eps )");
-  for(int i=0;i<=N_steps_sqrt;i++)
+  const int N_of_intervals = 3;
+  const double z_left[N_of_intervals] = {0.0, 0.5, 1.5};
+  const double z_right[N_of_intervals] = {z_left[1],z_left[2],10.0};
+  const double z_step[N_of_intervals] = {0.05,0.1,0.5}; 
+  int N_steps[N_of_intervals];
+  for (int i =0;i<N_of_intervals;i++)
   {
-  double z = z_min_sqrt+i*z_step_sqrt;
+    N_steps[i] = (int)((z_right[i]-z_left[i])/z_step[i]);
+  }
+  N_steps[N_of_intervals-1]+=1;//add extra step for last interval
+  
+  //printing arctg:
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(1/2,1,3/2,z)", "atan(z)/z", "( eps )");
+  for(int N_intrv = 0; N_intrv<N_of_intervals;N_intrv++)
+  {
+  for(int i=0;i<N_steps[N_intrv];i++)
+  {
+  double z = z_left[N_intrv]+i*z_step[N_intrv];
+  double Hyper_sqrt = F_hyper(0.5,1.,1.5, -z*z);
+  double Theor_sqrt = (fabs(z) < DBL_EPSILON) ? 1.0 : atan(z)/z;
+  double eps_sqrt = fabs((Hyper_sqrt - Theor_sqrt)/Theor_sqrt);
+  
+  printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_sqrt, Theor_sqrt, eps_sqrt);
+  }
+  }
+  //printing sqrt:
+  printf("\n%-6s\t%-20s\t%-20s\t%-12s\n", "z", "F21(-1/4,1/4,1/2,z)", "1/2*sqrt(...)", "( eps )");
+  for(int N_intrv = 0; N_intrv<N_of_intervals;N_intrv++)
+  {
+  for(int i=0;i<N_steps[N_intrv];i++)
+  {
+  double z = z_left[N_intrv]+i*z_step[N_intrv];
   double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
   double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
   double eps_sqrt = fabs((Hyper_sqrt - Theor_sqrt)/Theor_sqrt);
   
   printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_sqrt, Theor_sqrt, eps_sqrt);
   }
+  }
+  
+
 }
