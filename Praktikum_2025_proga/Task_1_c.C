@@ -27,7 +27,12 @@ double F_hyper(double a, double b, double c, double z)
                 * F_hyper(c-a,c-b,c-a-b+1.,1.-z);
     return (y);
   }
-
+  else if(z<-0.5)
+  {
+    double y = pow((1-z), -a) * F_hyper(a,c-b,c,z/(z-1));
+    cout<<"z<0.5"<<endl;
+    return(y);
+  }
   else
   {
     double N = 1.0;
@@ -51,15 +56,17 @@ double F_hyper(double a, double b, double c, double z)
 
 void Task_1_c()
 {
-  double z = 0.8;
+  double z = -0.8;
 
+  //for "sqrt" function we can use formula (5) if z<-1/2
   double Hyper_sqrt = F_hyper(-1./4.,1./4., 1./2., -z*z);
   double Theor_sqrt = 0.5*(sqrt(sqrt(1+z*z)+z)+sqrt(sqrt(1+z*z)-z));
 
-  //for next "arcsin" function we can use recurrent formula (4)
+  //for next "arcsin" function we can use recurrent formula (4) if c-a-b not int
   double Hyper_arcsin = F_hyper(0.5,0.5,1.5,z*z);
   double Theor_arcsin = (fabs(z) < DBL_EPSILON) ? 1.0 : asin(z)/z;
 
+  //for "sqrt" function we also can use formula (5) if z<-1/2
   double Hyper_ln = F_hyper(1.,1.,2.,z);
   double Theor_ln = (fabs(z) < DBL_EPSILON) ? 1.0 : -log(1-z)/z;
 
