@@ -5,11 +5,14 @@
       "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/home/lirikk/root/bin/root.exe",
+      //"program": "/home/lirikk/root/bin/root.exe", this is for root's macros
+      "program": "${workspaceFolder}/Macro_1/picoAnalyzerStandalone",
       "args": [
-        "-l",
-        "-q",
-        "Program1.C+g"
+        "Data_Expiriment_1/st_physics_adc_22031042_raw_0000002.picoDst.root", //input file here
+        "Output_Data_1/Output_file_1.root" //output file here
+        //"-l",
+        //"-q",
+        //""
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
