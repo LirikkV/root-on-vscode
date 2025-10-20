@@ -7,7 +7,7 @@
                 "/home/lirikk/root/include/",
                 "/home/lirikk/StPicoEvent"
             ],
-            "defines": [],
+            "defines": ["_VANILLA_ROOT_"],//this needs to Picodst library
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
