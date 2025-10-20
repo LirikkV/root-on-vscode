@@ -118,6 +118,11 @@ int main(int argc, char* argv[]) {
 			    200,-10.,10.,200,-10.,10.);
   TH1F *hVtxZ = new TH1F("hVtxZ","hVtxZ",
 			 140, -70., 70.);
+  //after event cut
+  TH2F *hVtxXvsY_cut = new TH2F("hVtxXvsY_cut",
+			    "hVtxXvsY_cut",
+			    200,-10.,10.,200,-10.,10.);
+  
 
   // Track
   TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
@@ -174,6 +179,10 @@ int main(int argc, char* argv[]) {
 
   // EPD hit
   TH1F *hEpdAdc = new TH1F("hEpdAdc","ADC in EPD;ADC",4095, 0., 4095);
+  
+  //variables for event cut:
+  double_t V_r_Max = 2.0;//cm
+  
 
 
   // Loop over events
@@ -204,6 +213,15 @@ int main(int argc, char* argv[]) {
     TVector3 pVtx = event->primaryVertex();
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
+
+    //event cut 
+    Double_t V_x = event->primaryVertex().X();
+    Double_t V_y = event->primaryVertex().Y();
+    Double_t V_r = sqrt(V_x*V_x + V_y*V_y);
+    if(V_r<V_r_Max)
+    {
+      hVtxXvsY_cut->Fill(V_x,V_y);
+    }
 
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
