@@ -122,7 +122,8 @@ int main(int argc, char* argv[]) {
   TH2F *hVtxXvsY_cut = new TH2F("hVtxXvsY_cut",
 			    "hVtxXvsY_cut",
 			    200,-10.,10.,200,-10.,10.);
-  
+  TH1F *hVtxZ_cut = new TH1F("hVtxZ_cut","hVtxZ_cut",
+			 140, -70., 70.);
 
   // Track
   TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
@@ -180,10 +181,6 @@ int main(int argc, char* argv[]) {
   // EPD hit
   TH1F *hEpdAdc = new TH1F("hEpdAdc","ADC in EPD;ADC",4095, 0., 4095);
   
-  //variables for event cut:
-  double_t V_r_Max = 2.0;//cm
-  
-
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -213,15 +210,6 @@ int main(int argc, char* argv[]) {
     TVector3 pVtx = event->primaryVertex();
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
-
-    //event cut 
-    Double_t V_x = event->primaryVertex().X();
-    Double_t V_y = event->primaryVertex().Y();
-    Double_t V_r = sqrt(V_x*V_x + V_y*V_y);
-    if(V_r<V_r_Max)
-    {
-      hVtxXvsY_cut->Fill(V_x,V_y);
-    }
 
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
@@ -284,6 +272,24 @@ int main(int argc, char* argv[]) {
 	hTofBeta->Fill( trait->btofBeta() );
       } //if( isTofTrack() )
       
+    
+    //Lirikk's cuts:
+    //variables for event cut:
+    double_t V_r_Max = 2.0;//cm
+    double_t V_z_Max = 40.0;//cm
+    //variables for track cut:
+
+    //Event cuts:
+    Double_t V_x = event->primaryVertex().X();
+    Double_t V_y = event->primaryVertex().Y();
+    Double_t V_z = event->primaryVertex().Z();
+    Double_t V_r = sqrt(V_x*V_x + V_y*V_y);
+    if(V_r<V_r_Max && fabs(V_z)<V_z_Max)
+    {
+      hVtxXvsY_cut->Fill(V_x,V_y);
+      hVtxZ_cut->Fill(V_z);
+    }
+
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     //////////////////
