@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
           61, -0.5,60.5);
   TH1F *hDCA = new TH1F("hDCA", "DCA to ptimary vertex", 
           100, 0.0,5.0);
-  TH1F *hDCA_cut = new TH1F("hDCA", "DCA to ptimary vertex after cut", 
+  TH1F *hDCA_cut = new TH1F("hDCA_cut", "DCA to ptimary vertex after cut", 
           100, 0.0,5.0);
 
 
@@ -237,8 +237,7 @@ int main(int argc, char* argv[]) {
       //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
 
       hGlobalPtot->Fill( picoTrack->gMom().Mag() );
-      
-      
+
       // Simple single-track cut
       if( picoTrack->gMom().Mag() < 0.1 ||
 	  picoTrack->gDCA(pVtx).Mag()>50. ) {
@@ -296,11 +295,12 @@ int main(int argc, char* argv[]) {
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;
-    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut) 
+    Bool_t is_DCA_abs_cut = picoTrack->gDCA(pVtx).Mag()<DCA_max;
+    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut && is_DCA_abs_cut) 
     {
       hNFitHits_cut->Fill(picoTrack->nHitsFit());
 	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
-      
+      hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
