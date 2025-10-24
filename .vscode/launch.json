@@ -7,7 +7,8 @@
       "request": "launch",
       "program": "${workspaceFolder}/Macro_1/picoAnalyzerStandalone",//compilated program here
       "args": [
-        "${workspaceFolder}/Data_Expiriment_1/st_physics_adc_22031042_raw_0000002.picoDst.root", //input file here
+        //"${workspaceFolder}/Data_Expiriment_1/st_physics_adc_22031042_raw_0000002.picoDst.root", //input file here
+        "${workspaceFolder}/Data_Expiriment_1/DataSet_1.list", //input file here
         "${workspaceFolder}/Output_Data_1/Output_file_1.root" //output file here
       ],
       "stopAtEntry": false,

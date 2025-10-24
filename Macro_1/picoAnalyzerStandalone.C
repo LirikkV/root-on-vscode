@@ -134,10 +134,11 @@ int main(int argc, char* argv[]) {
 				  100, 0., 1. );
   TH1F *hPrimaryPtot = new TH1F("hPrimaryPtot",
 				"Primary track momentum;p (GeV/c)",
-			       100, 0., 1. );
-  TH1F *hPrimaryPtotCut = new TH1F("hPrimaryPtotCut",
+			       100, 0., 2. );
+  //after track cut:
+  TH1F *hPrimaryPtot_cut = new TH1F("hPrimaryPtot_cut",
 				   "Primary track momentum after cut;p (GeV/c)",
-				  100, 0., 1. );
+				  100, 0., 2. );
   TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
 				   "Track transverse momentum;p_{T} (GeV/c)",
 				   200, 0., 2.);
@@ -159,8 +160,8 @@ int main(int argc, char* argv[]) {
 			       400, -10., 10.);
   TH1F *hNSigmaProton = new TH1F("hNSigmaProton",
 				 "n#sigma(p);n#sigma(p)",
-				 400, -10., 10.);
-    
+				 400, -10., 10.);       
+
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
@@ -180,6 +181,7 @@ int main(int argc, char* argv[]) {
 
   // EPD hit
   TH1F *hEpdAdc = new TH1F("hEpdAdc","ADC in EPD;ADC",4095, 0., 4095);
+
   
 
   // Loop over events
@@ -211,6 +213,23 @@ int main(int argc, char* argv[]) {
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
 
+    // Lirikk's cuts:
+    // variables for event cut:
+    double_t Vtx_r_Max = 2.0;  // cm
+    double_t Vtx_z_Max = 40.0; // cm
+
+    // Event selection:
+    Double_t Vtx_x = event->primaryVertex().X();
+    Double_t Vtx_y = event->primaryVertex().Y();
+    Double_t Vtx_z = event->primaryVertex().Z();
+    Double_t Vtx_r = sqrt(Vtx_x * Vtx_x + Vtx_y * Vtx_y);
+    if (Vtx_r < Vtx_r_Max && fabs(Vtx_z) < Vtx_z_Max)
+    {
+      //filling QA hists after cut:
+      hVtxXvsY_cut->Fill(Vtx_x, Vtx_y);
+      hVtxZ_cut->Fill(Vtx_z);
+    
+
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
     Int_t nMatrices = dst->numberOfTrackCovMatrices();
@@ -240,9 +259,9 @@ int main(int argc, char* argv[]) {
       } 
 
       hGlobalPtotCut->Fill( picoTrack->gMom().Mag() );
-      if( picoTrack->isPrimary() ) {
-	hPrimaryPtotCut->Fill( picoTrack->pMom().Mag() );
-      }
+      
+
+
       if( picoTrack->charge() > 0 ) {
 	hGlobalPhiVsPt[0]->Fill( picoTrack->gMom().Pt(),
 				 picoTrack->gMom().Phi() );
@@ -271,25 +290,20 @@ int main(int argc, char* argv[]) {
 	// Fill beta
 	hTofBeta->Fill( trait->btofBeta() );
       } //if( isTofTrack() )
-      
     
-    //Lirikk's cuts:
-    //variables for event cut:
-    double_t V_r_Max = 2.0;//cm
-    double_t V_z_Max = 40.0;//cm
-    //variables for track cut:
-
-    //Event cuts:
-    Double_t V_x = event->primaryVertex().X();
-    Double_t V_y = event->primaryVertex().Y();
-    Double_t V_z = event->primaryVertex().Z();
-    Double_t V_r = sqrt(V_x*V_x + V_y*V_y);
-    if(V_r<V_r_Max && fabs(V_z)<V_z_Max)
+    //Track selection:
+    // variables for track cut:
+    Double_t p_tot_prim_min = 0.15;//Gev/c
+    Double_t p_tot_prim_max = 1.5;//Gev/c
+    //track selection:
+    Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
+                            p_tot_prim_min < picoTrack->pMom().Mag() &&
+                            picoTrack->pMom().Mag()<p_tot_prim_max;
+    if( is_p_tot_prim_cut) 
     {
-      hVtxXvsY_cut->Fill(V_x,V_y);
-      hVtxZ_cut->Fill(V_z);
-    }
+	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
 
+    }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     //////////////////
@@ -341,7 +355,7 @@ int main(int argc, char* argv[]) {
       //std::cout << "EpdHit #[" << (iHit+1) << "/" << nEpdHits << "]"  << std::endl;
       hEpdAdc->Fill( epdHit->adc() );
     }
-
+    }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
   picoReader->Finish();

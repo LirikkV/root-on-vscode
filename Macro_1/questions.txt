@@ -1,0 +1,4 @@
+1)End of event cuts - before or after Hit analysis?
+2)QA hists before and after track cuts suggest that we already cut event?
+3)same for QA hists of PID - we suggest that already have cut track and event?
+4)Difference between pMom and gMom
