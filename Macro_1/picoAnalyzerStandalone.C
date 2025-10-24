@@ -165,7 +165,12 @@ int main(int argc, char* argv[]) {
           61, -0.5,60.5);
   TH1I *hNFitHits_cut = new TH1I("hNFitHits_cut", "Number of hits in TPC for track fit after cut",
           61, -0.5,60.5);
-  
+  TH1F *hDCA = new TH1F("hDCA", "DCA to ptimary vertex", 
+          100, 0.0,5.0);
+  TH1F *hDCA_cut = new TH1F("hDCA", "DCA to ptimary vertex after cut", 
+          100, 0.0,5.0);
+
+
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
@@ -205,15 +210,13 @@ int main(int argc, char* argv[]) {
     double_t Vtx_z_Max = 40.0; // cm
 
     // Event selection:
-    Double_t Vtx_x = event->primaryVertex().X();
-    Double_t Vtx_y = event->primaryVertex().Y();
-    Double_t Vtx_z = event->primaryVertex().Z();
-    Double_t Vtx_r = event->primaryVertex().Perp();
-    if (Vtx_r < Vtx_r_Max && fabs(Vtx_z) < Vtx_z_Max)
+    Bool_t is_Vtx_r_cut = event->primaryVertex().Perp() < Vtx_r_Max;
+    Bool_t is_abs_Vtx_z_cut = fabs(event->primaryVertex().Z()) < Vtx_z_Max;
+    if (is_Vtx_r_cut && is_abs_Vtx_z_cut)
     {
       //filling QA hists after cut:
-      hVtxXvsY_cut->Fill(Vtx_x, Vtx_y);
-      hVtxZ_cut->Fill(Vtx_z);
+      hVtxXvsY_cut->Fill(event->primaryVertex().X(), event->primaryVertex().Y());
+      hVtxZ_cut->Fill(event->primaryVertex().Z());
     
 
     // Track analysis
@@ -281,9 +284,11 @@ int main(int argc, char* argv[]) {
     {
       hPrimaryPtot->Fill(picoTrack->pMom().Mag());
     }
+    hDCA->Fill(picoTrack->gDCA(pVtx).Mag());
     //Track selection:
     // variables for track cut:
     Int_t N_TPC_fit_hits_min = 15;
+    Double_t DCA_max = 3.0;//cm
     Double_t p_tot_prim_min = 0.15;//Gev/c
     Double_t p_tot_prim_max = 1.5;//Gev/c
     //track selection:
