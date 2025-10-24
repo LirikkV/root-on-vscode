@@ -306,55 +306,7 @@ int main(int argc, char* argv[]) {
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
-    //////////////////
-    // Hit analysis //
-    //////////////////
-
-    // BTOF hits
-    Int_t nBTofHits = dst->numberOfBTofHits();
-    //std::cout << "Number of btofHits in event: " << nBTofHits << std::endl;
-    for(Int_t iHit=0; iHit<nBTofHits; iHit++) {
-      StPicoBTofHit *btofHit = dst->btofHit(iHit);
-      if( !btofHit ) continue;
-      //std::cout << "BTofHit #[" << (iHit+1) << "/" << nBTofHits << "]"  << std::endl;
-      hBTofTrayHit->Fill( btofHit->tray() );
-    } //for(Int_t iHit=0; iHit<nBTofHits; iHit++)
-
-    // BTOW hits
-    Int_t nBTowHits = dst->numberOfBTowHits();
-    for(Int_t iHit=0; iHit<nBTowHits; iHit++) {
-      StPicoBTowHit *btowHit = dst->btowHit(iHit);
-      if( !btowHit ) continue;
-      //std::cout << "BTowHit #[" << (iHit+1) << "/" << nBTowHits << "]"  << std::endl;
-      hBTowAdc->Fill( btowHit->adc() );
-    }
-
-    // FMS hits
-    Int_t nFmsHits = dst->numberOfFmsHits();
-    for(Int_t iHit=0; iHit<nFmsHits; iHit++) {
-      StPicoFmsHit *fmsHit = dst->fmsHit(iHit);
-      if( !fmsHit ) continue;
-      //std::cout << "FmsHit #[" << (iHit+1) << "/" << nFmsHits << "]"  << std::endl;
-      hFmsAdc->Fill( fmsHit->adc() );
-    }
-
-    // ETOF hits
-    Int_t nETofHits = dst->numberOfETofHits();
-    for(Int_t iHit=0; iHit<nETofHits; iHit++) {
-      StPicoETofHit *etofHit = dst->etofHit(iHit);
-      if( !etofHit ) continue;
-      //std::cout << "ETofHit #[" << (iHit+1) << "/" << nETofHits << "]"  << std::endl;
-      hETofToT->Fill( etofHit->timeOverThreshold() );
-    }
     
-    // EPD hits
-    Int_t nEpdHits = dst->numberOfEpdHits();
-    for(Int_t iHit=0; iHit<nEpdHits; iHit++) {
-      StPicoEpdHit *epdHit = dst->epdHit(iHit);
-      if( !epdHit ) continue;
-      //std::cout << "EpdHit #[" << (iHit+1) << "/" << nEpdHits << "]"  << std::endl;
-      hEpdAdc->Fill( epdHit->adc() );
-    }
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
