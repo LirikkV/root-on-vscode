@@ -9,11 +9,6 @@
       "Program1.C": "cpp",
       "Femt_1.C": "cpp",
       "picoAnalyzerStandalone.C": "cpp",
-      "test_1.C": "cpp",
-      "Task_1_c.C": "cpp",
-      "zvYO7f_picoAnalyzerStandalone.C": "cpp",
-      "tU0C58_picoAnalyzerStandalone.C": "cpp",
-      "ostream": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",

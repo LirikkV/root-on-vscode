@@ -161,28 +161,14 @@ int main(int argc, char* argv[]) {
   TH1F *hNSigmaProton = new TH1F("hNSigmaProton",
 				 "n#sigma(p);n#sigma(p)",
 				 400, -10., 10.);       
-
+  TH1I *hNFitHits = new TH1I("hNFitHits", "Number of hits in TPC for track fit",
+          61, -0.5,60.5);
+  TH1I *hNFitHits_cut = new TH1I("hNFitHits_cut", "Number of hits in TPC for track fit after cut",
+          61, -0.5,60.5);
+  
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
-
-  // BTOF hit
-  TH1F *hBTofTrayHit = new TH1F("hBTofTrayHit","BTof tray number with the hit",
-				120, -0.5, 119.5);
-
-  // BTOW hit
-  TH1F *hBTowAdc = new TH1F("hBTowAdc","Barrel tower ADC;ADC",500,0.,500);
-
-  // FMS hit
-  TH1F *hFmsAdc = new TH1F("hFmsAdc","ADC in FMS modules;ADC",1000, 0.,5000);
-
-  // ETOF hit
-  TH1F *hETofToT = new TH1F("hETofToT","eTOF TOT;Time over threshold (ns)",300, 0.,150);
-
-  // EPD hit
-  TH1F *hEpdAdc = new TH1F("hEpdAdc","ADC in EPD;ADC",4095, 0., 4095);
-
-  
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -248,9 +234,7 @@ int main(int argc, char* argv[]) {
       //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
 
       hGlobalPtot->Fill( picoTrack->gMom().Mag() );
-      if( picoTrack->isPrimary() ) {
-	hPrimaryPtot->Fill( picoTrack->pMom().Mag() );
-      }
+      
       
       // Simple single-track cut
       if( picoTrack->gMom().Mag() < 0.1 ||
@@ -290,21 +274,28 @@ int main(int argc, char* argv[]) {
 	// Fill beta
 	hTofBeta->Fill( trait->btofBeta() );
       } //if( isTofTrack() )
-    
+      
+    //Lirikk's QA hists before track selection:
+    hNFitHits->Fill(picoTrack->nHitsFit());
+    if (picoTrack->isPrimary())
+    {
+      hPrimaryPtot->Fill(picoTrack->pMom().Mag());
+    }
     //Track selection:
     // variables for track cut:
     Int_t N_TPC_fit_hits_min = 15;
     Double_t p_tot_prim_min = 0.15;//Gev/c
     Double_t p_tot_prim_max = 1.5;//Gev/c
     //track selection:
-    Bool_t is_N_TPC_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
+    Bool_t is_N_TPC_fir_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;
-    if( is_p_tot_prim_cut) 
+    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut) 
     {
+      hNFitHits_cut->Fill(picoTrack->nHitsFit());
 	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
-
+      
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
