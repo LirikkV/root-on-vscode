@@ -5,7 +5,7 @@ CXX = g++
 LINKER = g++
 
 # Debug flag: either nothing or -ggdb
-DEBUGFLAG = -ggdb -g3
+DEBUGFLAG = 
 
 # Opitmization flag
 OPTFLAG = -O2

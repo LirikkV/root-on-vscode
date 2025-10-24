@@ -293,9 +293,11 @@ int main(int argc, char* argv[]) {
     
     //Track selection:
     // variables for track cut:
+    Int_t N_TPC_fit_hits_min = 15;
     Double_t p_tot_prim_min = 0.15;//Gev/c
     Double_t p_tot_prim_max = 1.5;//Gev/c
     //track selection:
+    Bool_t is_N_TPC_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;

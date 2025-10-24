@@ -5,7 +5,11 @@
       "label": "build-picoAnalyzer",
       "type": "shell",
       "command": "make",
-      "args": ["-B","-j4"],
+      "args": ["-B", //flag for rebuild macro
+              "-j4", //flag for run Makefile
+              "DEBUGFLAG = -ggdb -g3",//flag for compile with debug information. we also can put this into Makefile
+              "OPTFLAG=-O0" // flag to turn off optimization for better debug - now can watch for more variables
+                  ],
       "options": {
         "cwd": "${workspaceFolder}/Macro_1" //path to Make-file
       },
