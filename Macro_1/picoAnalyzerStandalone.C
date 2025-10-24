@@ -175,6 +175,12 @@ int main(int argc, char* argv[]) {
   TH1F *hPrimaryPtrans_cut = new TH1F("hPrimaryPttrans_cut",
 				   "Primary track transverce momentum after cut;p (GeV/c)",
 				  100, 0., 2. );
+  TH1F *hPrimaryPseudorap = new TH1F("hPrimaryPseudorap",
+				   "Primary track pseudorapidity",
+				  100, -2., 2. );
+  TH1F *hPrimaryPseudorap_cut = new TH1F("hPrimaryPseudorap_cut",
+				   "Primary track pseudorapidity after cut",
+				  100, -2., 2. );
 
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
@@ -288,6 +294,7 @@ int main(int argc, char* argv[]) {
     {
       hPrimaryPtot->Fill(picoTrack->pMom().Mag());
       hPrimaryPtrans->Fill(picoTrack->pMom().Pt());
+      hPrimaryPseudorap->Fill(picoTrack->pMom().Eta());
     }
     hDCA->Fill(picoTrack->gDCA(pVtx).Mag());
     //Track selection:
@@ -298,6 +305,7 @@ int main(int argc, char* argv[]) {
     Double_t p_tot_prim_max = 1.5;//Gev/c
     Double_t p_trans_prim_min = 0.15;
     Double_t p_trans_prim_max = 1.5;
+    Double_t pseudo_rap_prim_max = 1.0;
     //track selection:
     Bool_t is_N_TPC_fir_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
@@ -307,13 +315,17 @@ int main(int argc, char* argv[]) {
     Bool_t is_p_trans_prim_cut = picoTrack->isPrimary() && 
                             p_trans_prim_min<picoTrack->pMom().Pt() &&
                             picoTrack->pMom().Pt()<p_trans_prim_max;
+    Bool_t is_pseudo_prm_cut = picoTrack->isPrimary() &&
+                            fabs(picoTrack->pMom().Eta())<pseudo_rap_prim_max;
     if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut && 
-      is_DCA_abs_cut && is_p_trans_prim_cut) 
+      is_DCA_abs_cut && is_p_trans_prim_cut && 
+      is_pseudo_prm_cut) 
     {
       hNFitHits_cut->Fill(picoTrack->nHitsFit());
 	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
       hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
       hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
+      hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
