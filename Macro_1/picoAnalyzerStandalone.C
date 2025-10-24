@@ -222,7 +222,7 @@ int main(int argc, char* argv[]) {
     Double_t Vtx_x = event->primaryVertex().X();
     Double_t Vtx_y = event->primaryVertex().Y();
     Double_t Vtx_z = event->primaryVertex().Z();
-    Double_t Vtx_r = sqrt(Vtx_x * Vtx_x + Vtx_y * Vtx_y);
+    Double_t Vtx_r = event->primaryVertex().Perp();
     if (Vtx_r < Vtx_r_Max && fabs(Vtx_z) < Vtx_z_Max)
     {
       //filling QA hists after cut:
