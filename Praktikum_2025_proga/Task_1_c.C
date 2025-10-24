@@ -17,6 +17,7 @@ double F_hyper(double a, double b, double c, double z)
   //   cout << "Lirikk's WARNING! Series does not converge, cause |z| > 1" << endl;
   //   return (NAN);
   // }
+  
   //second check for special case: 
   if(0.5<z && z<=1.0 && (c) && !is_abc_int)
   {
@@ -90,7 +91,7 @@ void Task_1_c()
   
   printf("%-6.2f\t%20.17f\t%20.17f\t%-10.3e\n", z, Hyper_asin, Theor_asin, eps_asin);
   }
-  
+  //return ;
   
   //for "sqrt" function we can use formula (5) if z<-1/2
   const int N_of_intervals = 3;
