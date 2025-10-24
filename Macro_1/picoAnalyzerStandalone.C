@@ -169,7 +169,12 @@ int main(int argc, char* argv[]) {
           100, 0.0,5.0);
   TH1F *hDCA_cut = new TH1F("hDCA_cut", "DCA to ptimary vertex after cut", 
           100, 0.0,5.0);
-
+  TH1F *hPrimaryPtrans = new TH1F("hPrimaryPtrans",
+				"Primary track trancverse momentum;p (GeV/c)",
+			       100, 0., 2. );
+  TH1F *hPrimaryPtrans_cut = new TH1F("hPrimaryPttrans_cut",
+				   "Primary track transverce momentum after cut;p (GeV/c)",
+				  100, 0., 2. );
 
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
@@ -282,6 +287,7 @@ int main(int argc, char* argv[]) {
     if (picoTrack->isPrimary())
     {
       hPrimaryPtot->Fill(picoTrack->pMom().Mag());
+      hPrimaryPtrans->Fill(picoTrack->pMom().Pt());
     }
     hDCA->Fill(picoTrack->gDCA(pVtx).Mag());
     //Track selection:
@@ -290,17 +296,24 @@ int main(int argc, char* argv[]) {
     Double_t DCA_max = 3.0;//cm
     Double_t p_tot_prim_min = 0.15;//Gev/c
     Double_t p_tot_prim_max = 1.5;//Gev/c
+    Double_t p_trans_prim_min = 0.15;
+    Double_t p_trans_prim_max = 1.5;
     //track selection:
     Bool_t is_N_TPC_fir_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;
     Bool_t is_DCA_abs_cut = picoTrack->gDCA(pVtx).Mag()<DCA_max;
-    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut && is_DCA_abs_cut) 
+    Bool_t is_p_trans_prim_cut = picoTrack->isPrimary() && 
+                            p_trans_prim_min<picoTrack->pMom().Pt() &&
+                            picoTrack->pMom().Pt()<p_trans_prim_max;
+    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut && 
+      is_DCA_abs_cut && is_p_trans_prim_cut) 
     {
       hNFitHits_cut->Fill(picoTrack->nHitsFit());
 	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
       hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
+      hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
