@@ -372,6 +372,8 @@ int main(int argc, char* argv[]) {
 
       //variables for QA:
       Double_t m_square = picoTrack->pMom().Mag2()*(1./((trait->btofBeta())*(trait->btofBeta()))-1.);
+      Double_t m_Pion = 0.13957039;
+      Double_t one_beta_expect = sqrt(m_Pion*m_Pion+(picoTrack->pMom().Mag2()))/(picoTrack->pMom().Mag());
 
       //QA histograms after TOF check before PID
       h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
@@ -379,7 +381,9 @@ int main(int argc, char* argv[]) {
       
       Bool_t is_p_tot_tof = p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
-      if(is_p_tot_tof && is_nSigma_Pion)
+      Bool_t is_1_beta_delta = fabs(1./(trait->btofBeta())-one_beta_expect)<one_over_beta_delta_max;
+      if(is_p_tot_tof && is_nSigma_Pion 
+          && is_1_beta_delta)
       {
         //Fill hists after PID cut:
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
