@@ -350,32 +350,29 @@ int main(int argc, char* argv[]) {
       //constants for PID:
       Double_t p_tot_prim_mid_PID = 0.55;//Gev/c
       Double_t one_over_beta_delta_max = 0.015;
-      //Lirikk's QA before PID:
+      Float_t nSigmaPion_max = 3.0;
+      //Lirikk's QA before PID TOF check:
       hNSigmPion_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaPion());
       
       //TPC only:
 
       //TPC+TOF:
-      //QA histograms for TOF+TPC before PID
       if( picoTrack->isTofTrack() ) {
-        StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
-        // Fill QA histograms
-        h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
-      } // if( isTofTrack() )
+      StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex()); // Retrieve corresponding trait
+      //QA histograms for TOF+TPC before PID
+      h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
 
-      //variables for TPC + TOF identification
-      Float_t nSigmaPion_max = 3.0;
-
-      Bool_t is_for_TOF_analys = picoTrack->isTofTrack() && p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
+      Bool_t is_p_tot = p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
-      if(is_for_TOF_analys && is_nSigma_Pion)
+      if(is_p_tot && is_nSigma_Pion)
       {
-        // Retrieve corresponding trait
-        StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
         //Fill hists after PID cut:
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
-      }
+      }//end of PID
+
+    }//end of TOF
+
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
