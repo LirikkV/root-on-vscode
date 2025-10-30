@@ -202,7 +202,13 @@ int main(int argc, char* argv[]) {
   TH2F *hm2_vs_pPrimTotDevQ_cut_PID = new TH2F("hm2_vs_pPrimTotDevQ_cut_PID",
 			    "m^2 vs P_prim_tot/q after PID;;m^2(Gev/c)",
 			    200,-2.,2.,200,-1.,10.);
-
+  
+  TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ",
+			    "|1/beta - 1/beta_exp| vs P_prim_tot/q;;|1/beta - 1/beta_exp|",
+			    200,-2.,2.,200,-1.,10.);
+  TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID",
+			    "|1/beta - 1/beta_exp| vs P_prim_tot/q after PID;;|1/beta - 1/beta_exp|",
+			    200,-2.,2.,200,-2.,2.);
 
 
   // BTof pid traits
@@ -378,7 +384,8 @@ int main(int argc, char* argv[]) {
       //QA histograms after TOF check before PID
       h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
       hm2_vs_pPrimTotDevQ->Fill(PtotPrimQ,m_square);
-      
+      h1_OverBetaDelta_vs_pPrimTotDevQ->Fill(PtotPrimQ, fabs(1./(trait->btofBeta()) - one_beta_expect));
+
       Bool_t is_p_tot_tof = p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
       Bool_t is_1_beta_delta = fabs(1./(trait->btofBeta())-one_beta_expect)<one_over_beta_delta_max;
@@ -389,6 +396,7 @@ int main(int argc, char* argv[]) {
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
+        h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, fabs(1./(trait->btofBeta()) - one_beta_expect));
       }//end of PID
 
     }//end of TOF
