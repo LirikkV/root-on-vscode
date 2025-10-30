@@ -307,7 +307,7 @@ int main(int argc, char* argv[]) {
     Double_t p_trans_prim_max = 1.5;
     Double_t pseudo_rap_prim_max = 1.0;
     //track selection:
-    Bool_t is_N_TPC_fir_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
+    Bool_t is_N_TPC_fit_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;
@@ -317,7 +317,7 @@ int main(int argc, char* argv[]) {
                             picoTrack->pMom().Pt()<p_trans_prim_max;
     Bool_t is_pseudo_prm_cut = picoTrack->isPrimary() &&
                             fabs(picoTrack->pMom().Eta())<pseudo_rap_prim_max;
-    if(is_N_TPC_fir_hits_cut && is_p_tot_prim_cut && 
+    if(is_N_TPC_fit_hits_cut && is_p_tot_prim_cut && 
       is_DCA_abs_cut && is_p_trans_prim_cut && 
       is_pseudo_prm_cut) 
     {
@@ -326,6 +326,24 @@ int main(int argc, char* argv[]) {
       hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
       hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
+
+      //Lirikk's QA before PID:
+
+      //start of PID:
+      //variables for PID:
+      Double_t p_tot_prim_mid_PID = 0.55;//Gev/c
+      //TPC only:
+
+      //TPC+TOF:
+      //variables for TPC + TOF identification
+      Float_t nSigmaPion_max = 3.0;
+
+      Bool_t is_TOF_track = picoTrack->isTofTrack() && p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
+      Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
+      if(is_TOF_track && is_nSigma_Pion)
+      {
+
+      }
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
