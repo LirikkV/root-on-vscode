@@ -182,12 +182,21 @@ int main(int argc, char* argv[]) {
 				   "Primary track pseudorapidity after cut",
 				  100, -2., 2. );
   
-  TH2F *hNSigmPion_vs_pPrimTotDevidedQ = new TH2F("hNSigmPion_vs_pPrimTotDevQ",
+  TH2F *hNSigmPion_vs_pPrimTotDevQ = new TH2F("hNSigmPion_vs_pPrimTotDevQ",
 			    "nSigma(pion) vs P_prim_tot/q",
-			    400,-60.,60.,400,-2.,2.);
-  TH2F *hNSigmPion_vs_pPrimTotDevidedQ_cut_PID = new TH2F("hNSigmPion_vs_pPrimTotDevQ_cut_PID",
+			    400,-2.,2.,400,-60.,60.);
+  TH2F *hNSigmPion_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmPion_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(pion) vs P_prim_tot/q after cut",
-			    400,-60.,60.,400,-2.,2.);
+			    400,-2.,2.,400,-60.,60.);
+
+  TH2F *h1_OverBeta_vs_pPrimTotDevQ = new TH2F("1_OverBeta_vs_pPrimTotDevQ",
+			    "1/beta vs P_prim_tot/q",
+			    200,-2.,2.,200,-1.,10.);
+  TH2F *h1_OverBeta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBeta_vs_pPrimTotDevQ_cut_PID",
+			    "1/beta vs P_prim_tot/q after PID",
+			    200,-2.,2.,200,-1.,10.);
+
+
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
@@ -333,22 +342,39 @@ int main(int argc, char* argv[]) {
       hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
 
-      //Lirikk's QA before PID:
-      hNSigmPion_vs_pPrimTotDevidedQ->Fill(picoTrack->nSigmaPion(), (picoTrack->pMom().Mag())/(picoTrack->charge()));
+      
+      
       //start of PID:
       //variables for PID:
+      Double_t PtotPrimQ = (picoTrack->pMom().Mag())/(picoTrack->charge());
+      //constants for PID:
       Double_t p_tot_prim_mid_PID = 0.55;//Gev/c
+      Double_t one_over_beta_delta_max = 0.015;
+      //Lirikk's QA before PID:
+      hNSigmPion_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+      
       //TPC only:
 
       //TPC+TOF:
+      //QA histograms for TOF+TPC before PID
+      if( picoTrack->isTofTrack() ) {
+        StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
+        // Fill QA histograms
+        h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
+      } // if( isTofTrack() )
+
       //variables for TPC + TOF identification
       Float_t nSigmaPion_max = 3.0;
 
-      Bool_t is_TOF_track = picoTrack->isTofTrack() && p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
+      Bool_t is_for_TOF_analys = picoTrack->isTofTrack() && p_tot_prim_mid_PID<picoTrack->pMom().Mag(); //p_max already set by track choise
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
-      if(is_TOF_track && is_nSigma_Pion)
+      if(is_for_TOF_analys && is_nSigma_Pion)
       {
-        hNSigmPion_vs_pPrimTotDevidedQ_cut_PID->Fill(picoTrack->nSigmaPion(), (picoTrack->pMom().Mag())/(picoTrack->charge()));
+        // Retrieve corresponding trait
+        StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
+        //Fill hists after PID cut:
+        hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+        h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
       }
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
