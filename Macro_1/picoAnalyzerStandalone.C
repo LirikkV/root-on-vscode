@@ -181,7 +181,13 @@ int main(int argc, char* argv[]) {
   TH1F *hPrimaryPseudorap_cut = new TH1F("hPrimaryPseudorap_cut",
 				   "Primary track pseudorapidity after cut",
 				  100, -2., 2. );
-
+  
+  TH2F *hNSigmPion_vs_pPrimTotDevidedQ = new TH2F("hNSigmPion_vs_pPrimTotDevQ",
+			    "nSigma(pion) vs P_prim_tot/q",
+			    400,-60.,60.,400,-2.,2.);
+  TH2F *hNSigmPion_vs_pPrimTotDevidedQ_cut_PID = new TH2F("hNSigmPion_vs_pPrimTotDevQ_cut_PID",
+			    "nSigma(pion) vs P_prim_tot/q after cut",
+			    400,-60.,60.,400,-2.,2.);
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
@@ -328,7 +334,7 @@ int main(int argc, char* argv[]) {
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
 
       //Lirikk's QA before PID:
-
+      hNSigmPion_vs_pPrimTotDevidedQ->Fill(picoTrack->nSigmaPion(), (picoTrack->pMom().Mag())/(picoTrack->charge()));
       //start of PID:
       //variables for PID:
       Double_t p_tot_prim_mid_PID = 0.55;//Gev/c
@@ -342,7 +348,7 @@ int main(int argc, char* argv[]) {
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
       if(is_TOF_track && is_nSigma_Pion)
       {
-
+        hNSigmPion_vs_pPrimTotDevidedQ_cut_PID->Fill(picoTrack->nSigmaPion(), (picoTrack->pMom().Mag())/(picoTrack->charge()));
       }
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
