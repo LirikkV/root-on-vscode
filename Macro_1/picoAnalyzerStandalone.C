@@ -114,15 +114,15 @@ int main(int argc, char* argv[]) {
 			    "Reference multiplicity;refMult",
 			    500, -0.5, 499.5);
   TH2F *hVtxXvsY = new TH2F("hVtxXvsY",
-			    "hVtxXvsY",
+			    "Vtx XvsY",
 			    200,-10.,10.,200,-10.,10.);
-  TH1F *hVtxZ = new TH1F("hVtxZ","hVtxZ",
-			 140, -70., 70.);
-  //after event cut
   TH2F *hVtxXvsY_cut = new TH2F("hVtxXvsY_cut",
-			    "hVtxXvsY_cut",
+			    "Vtx XvsY after event cut",
 			    200,-10.,10.,200,-10.,10.);
-  TH1F *hVtxZ_cut = new TH1F("hVtxZ_cut","hVtxZ_cut",
+
+  TH1F *hVtxZ = new TH1F("hVtxZ","Vtx Z",
+			 140, -70., 70.);
+  TH1F *hVtxZ_cut = new TH1F("hVtxZ_cut","Vtx Z after event cut",
 			 140, -70., 70.);
 
   // Track
@@ -135,32 +135,22 @@ int main(int argc, char* argv[]) {
   TH1F *hPrimaryPtot = new TH1F("hPrimaryPtot",
 				"Primary track momentum;p (GeV/c)",
 			       100, 0., 2. );
-  //after track cut:
   TH1F *hPrimaryPtot_cut = new TH1F("hPrimaryPtot_cut",
-				   "Primary track momentum after cut;p (GeV/c)",
+				   "Primary track momentum after track cut;p (GeV/c)",
 				  100, 0., 2. );
+
   TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
 				   "Track transverse momentum;p_{T} (GeV/c)",
 				   200, 0., 2.);
+
   TH2F *hGlobalPhiVsPt[2];
   for(int i=0; i<2; i++) {
     hGlobalPhiVsPt[i] = new TH2F(Form("hGlobalPhiVsPt_%d",i),
 				 Form("#phi vs. p_{T} for charge: %d;p_{T} (GeV/c);#phi (rad)", (i==0) ? 1 : -1),
 				 300, 0., 3.,
 				 630, -3.15, 3.15);
-  }
-  TH1F *hNSigmaPion = new TH1F("hNSigmaPion",
-			       "n#sigma(#pi);n#sigma(#pi)",
-			       400, -10., 10.);
-  TH1F *hNSigmaElectron = new TH1F("hNSigmaElectron",
-				   "n#sigma(e);n#sigma(e)",
-				   400,-10.,10.);
-  TH1F *hNSigmaKaon = new TH1F("hNSigmaKaon",
-			       "n#sigma(K);n#sigma(K)",
-			       400, -10., 10.);
-  TH1F *hNSigmaProton = new TH1F("hNSigmaProton",
-				 "n#sigma(p);n#sigma(p)",
-				 400, -10., 10.);       
+  }     
+      
   TH1I *hNFitHits = new TH1I("hNFitHits", "Number of hits in TPC for track fit",
           61, -0.5,60.5);
   TH1I *hNFitHits_cut = new TH1I("hNFitHits_cut", "Number of hits in TPC for track fit after cut",
@@ -188,6 +178,29 @@ int main(int argc, char* argv[]) {
   TH2F *hNSigmPion_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmPion_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(pion) vs P_prim_tot/q after cut;;nSigma",
 			    200,-2.,2.,200,-5.,5.);
+
+  TH2F *hNSigmKaon_vs_pPrimTotDevQ = new TH2F("hNSigmKaon_vs_pPrimTotDevQ",
+			    "nSigma(Kaon) vs P_prim_tot/q;;nSigma",
+			    200,-2.,2.,200,-60.,60.);
+  TH2F *hNSigmKaon_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmKaon_vs_pPrimTotDevQ_cut_PID",
+			    "nSigma(Kaon) vs P_prim_tot/q after cut;;nSigma",
+			    200,-2.,2.,200,-30.,5.);
+  
+  TH2F *hNSigmProton_vs_pPrimTotDevQ = new TH2F("hNSigmProton_vs_pPrimTotDevQ",
+			    "nSigma(Proton) vs P_prim_tot/q;;nSigma",
+			    200,-2.,2.,200,-60.,60.);
+  TH2F *hNSigmProton_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmProton_vs_pPrimTotDevQ_cut_PID",
+			    "nSigma(Proton) vs P_prim_tot/q after cut;;nSigma",
+			    200,-2.,2.,200,-35.,5.);
+  
+  TH2F *hNSigmElectron_vs_pPrimTotDevQ = new TH2F("hNSigmElectron_vs_pPrimTotDevQ",
+			    "nSigma(Electron) vs P_prim_tot/q;;nSigma",
+			    200,-2.,2.,200,-60.,60.);
+  TH2F *hNSigmElectron_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmElectron_vs_pPrimTotDevQ_cut_PID",
+			    "nSigma(Electron) vs P_prim_tot/q after cut;;nSigma",
+			    200,-2.,2.,200,-10.,5.);
+  
+            
 
   TH2F *h1_OverBeta_vs_pPrimTotDevQ = new TH2F("1_OverBeta_vs_pPrimTotDevQ",
 			    "1/beta vs P_prim_tot/q;;1/beta",
@@ -244,9 +257,10 @@ int main(int argc, char* argv[]) {
 		<< std::endl;
       break;
     }
-    hRefMult->Fill( event->refMult() );
+    
 
     TVector3 pVtx = event->primaryVertex();
+    //QA hists before event selection:
     hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
     hVtxZ->Fill( event->primaryVertex().Z() );
 
@@ -260,10 +274,10 @@ int main(int argc, char* argv[]) {
     Bool_t is_abs_Vtx_z_cut = fabs(event->primaryVertex().Z()) < Vtx_z_Max;
     if (is_Vtx_r_cut && is_abs_Vtx_z_cut)
     {
-      //filling QA hists after cut:
+      //QA hists after event cut:
       hVtxXvsY_cut->Fill(event->primaryVertex().X(), event->primaryVertex().Y());
       hVtxZ_cut->Fill(event->primaryVertex().Z());
-    
+      hRefMult->Fill( event->refMult() );
 
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
@@ -280,58 +294,17 @@ int main(int argc, char* argv[]) {
       StPicoTrack *picoTrack = dst->track(iTrk);
       
       if(!picoTrack) continue;
-      //std::cout << "Track #[" << (iTrk+1) << "/" << nTracks << "]"  << std::endl;
-
-      hGlobalPtot->Fill( picoTrack->gMom().Mag() );
-
-      // Simple single-track cut
-      if( picoTrack->gMom().Mag() < 0.1 ||
-	  picoTrack->gDCA(pVtx).Mag()>50. ) {
-	continue;
-      } 
-
-      hGlobalPtotCut->Fill( picoTrack->gMom().Mag() );
       
-
-
-      if( picoTrack->charge() > 0 ) {
-	hGlobalPhiVsPt[0]->Fill( picoTrack->gMom().Pt(),
-				 picoTrack->gMom().Phi() );
-      }
-      else {
-	hGlobalPhiVsPt[1]->Fill( picoTrack->gMom().Pt(),
-				 picoTrack->gMom().Phi() );	
-      }
-      hNSigmaElectron->Fill( picoTrack->nSigmaElectron() );
-      hNSigmaPion->Fill( picoTrack->nSigmaPion() );
-      hNSigmaKaon->Fill( picoTrack->nSigmaKaon() );
-      hNSigmaProton->Fill( picoTrack->nSigmaProton() );
-      
-      hTransvMomentum->Fill( picoTrack->gMom().Pt() );
-
-      // Check if track has TOF signal
-      if( picoTrack->isTofTrack() ) {
-	// Retrieve corresponding trait
-	StPicoBTofPidTraits *trait = dst->btofPidTraits( picoTrack->bTofPidTraitsIndex() );
-	if( !trait ) {
-	  std::cout << "O-oh... No BTofPidTrait # " << picoTrack->bTofPidTraitsIndex()
-		    << " for track # " << iTrk << std::endl;
-	  std::cout << "Check that you turned on the branch!" << std::endl;
-	  continue;
-	}
-	// Fill beta
-	hTofBeta->Fill( trait->btofBeta() );
-      } //if( isTofTrack() )
-      
-    //Lirikk's QA hists before track selection:
+    //QA hists before track selection:
     hNFitHits->Fill(picoTrack->nHitsFit());
+    hDCA->Fill(picoTrack->gDCA(pVtx).Mag());  
     if (picoTrack->isPrimary())
     {
       hPrimaryPtot->Fill(picoTrack->pMom().Mag());
       hPrimaryPtrans->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap->Fill(picoTrack->pMom().Eta());
     }
-    hDCA->Fill(picoTrack->gDCA(pVtx).Mag());
+    
     //Track selection:
     // variables for track cut:
     Int_t N_TPC_fit_hits_min = 15;
@@ -356,6 +329,7 @@ int main(int argc, char* argv[]) {
       is_DCA_abs_cut && is_p_trans_prim_cut && 
       is_pseudo_prm_cut) 
     {
+      //QA after track selection:
       hNFitHits_cut->Fill(picoTrack->nHitsFit());
 	    hPrimaryPtot_cut->Fill( picoTrack->pMom().Mag() );
       hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
@@ -380,9 +354,13 @@ int main(int argc, char* argv[]) {
       Float_t nSigmaProton_min_TPC = 2.0;
 
 
-      //Lirikk's QA before PID TPC & TPC+TOF check:
+      //QA before PID TPC & TPC+TOF check:
       hNSigmPion_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+      hNSigmKaon_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaKaon());
+      hNSigmProton_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaProton());
+      hNSigmElectron_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
       hdEdx_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->dEdx());
+      
 
       //TPC only PID:
       if(picoTrack->pMom().Mag()<p_tot_prim_mid_PID) //p_min already set by track choise
@@ -395,9 +373,12 @@ int main(int argc, char* argv[]) {
         if(is_nSigma_Pion_TPC && is_nSigma_Electron_TPC 
             && is_nSigma_Kaon_TPC && is_nSigma_Proton_TPC)
         {
-          //Fill after PID TPC only cut:
+          //QA histis after PID but after TPC only:
           hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
           hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+          hNSigmKaon_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaKaon());
+          hNSigmProton_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaProton());
+          hNSigmElectron_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
         }
 
       }//end of TPC only
@@ -405,13 +386,20 @@ int main(int argc, char* argv[]) {
       else if( picoTrack->isTofTrack() && p_tot_prim_mid_PID<=picoTrack->pMom().Mag()) //p_max already set by track choise
       {
       StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex()); // Retrieve corresponding trait
-
+      if (!trait)
+      {
+        std::cout << "O-oh... No BTofPidTrait # " << picoTrack->bTofPidTraitsIndex()
+                  << " for track # " << iTrk << std::endl;
+        std::cout << "Check that you turned on the branch!" << std::endl;
+        continue;
+      }
+      
       //variables for QA:
       Double_t m_square = picoTrack->pMom().Mag2()*(1./((trait->btofBeta())*(trait->btofBeta()))-1.);
       Double_t m_Pion = 0.13957039;
       Double_t one_beta_expect = sqrt(m_Pion*m_Pion+(picoTrack->pMom().Mag2()))/(picoTrack->pMom().Mag());
 
-      //QA histograms after TOF check before PID
+      //QA hists before PID but after TOF check (all that contains trait):
       h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
       hm2_vs_pPrimTotDevQ->Fill(PtotPrimQ,m_square);
       h1_OverBetaDelta_vs_pPrimTotDevQ->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
@@ -422,13 +410,17 @@ int main(int argc, char* argv[]) {
       if(is_nSigma_Pion && is_1_beta_delta 
           && is_m2)
       {
-        //Fill hists after PID TPC+TOF cut:
+        //QA hists after PID TPC+TOF cut:
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+        hNSigmKaon_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaKaon());
+        hNSigmProton_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaProton());
+        hNSigmElectron_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
+
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
         h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
-
         hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
+
       }//end of PID
 
     }//end of TOF + TPC
