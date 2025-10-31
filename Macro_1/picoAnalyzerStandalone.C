@@ -194,22 +194,28 @@ int main(int argc, char* argv[]) {
 			    200,-2.,2.,200,-1.,10.);
   TH2F *h1_OverBeta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBeta_vs_pPrimTotDevQ_cut_PID",
 			    "1/beta vs P_prim_tot/q after PID;;1/beta",
-			    200,-2.,2.,200,0.8,1.2);
+			    400,-2.,2.,200,0.95,1.1);
   
   TH2F *hm2_vs_pPrimTotDevQ = new TH2F("hm2_vs_pPrimTotDevQ",
 			    "m^2 vs P_prim_tot/q;;m^2(Gev/c)",
 			    200,-2.,2.,200,-1.,10.);
   TH2F *hm2_vs_pPrimTotDevQ_cut_PID = new TH2F("hm2_vs_pPrimTotDevQ_cut_PID",
 			    "m^2 vs P_prim_tot/q after PID;;m^2(Gev/c)",
-			    200,-2.,2.,200,-0.2,0.2);
+			    400,-2.,2.,200,-0.1,0.1);
   
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ",
-			    "|1/beta - 1/beta_exp| vs P_prim_tot/q;;|1/beta - 1/beta_exp|",
+			    "1/beta - 1/beta_exp vs P_prim_tot/q;;1/beta - 1/beta_exp",
 			    200,-2.,2.,200,-1.,10.);
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID",
-			    "|1/beta - 1/beta_exp| vs P_prim_tot/q after PID;;|1/beta - 1/beta_exp|",
+			    "1/beta - 1/beta_exp vs P_prim_tot/q after PID;;1/beta - 1/beta_exp",
 			    200,-2.,2.,200,-0.02,0.04);
 
+  TH2F *hdEdx_vs_pPrimTotDevQ = new TH2F("hdEdx_vs_pPrimTotDevQ",
+			    "dE/dx vs P_prim_tot/q;;dE/dx(GeV/cm)",
+			    200,-1.6,1.6,200,-0.2,10.);
+  TH2F *hdEdx_vs_pPrimTotDevQ_cut_PID = new TH2F("hdEdx_vs_pPrimTotDevQ_cut_PID",
+			    "dE/dx vs P_prim_tot/q after PID;;dE/dx(GeV/cm)",
+			    200,-1.6,1.6,200,-0.2,10. );
 
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
@@ -365,20 +371,38 @@ int main(int argc, char* argv[]) {
       //constants for PID:
       Double_t p_tot_prim_mid_PID = 0.55;//Gev/c
       Double_t one_over_beta_delta_max = 0.015;
-      Float_t nSigmaPion_max = 3.0;
+      Float_t nSigmaPion_max_TOF = 3.0;
       Double_t m2_min = -0.05;//Gev^2/c^4
       Double_t m2_max = 0.08; //Gev^2/c^4
+      Float_t nSigmaPion_max_TPC = 2.0;
+      Float_t nSigmaElectron_min_TPC = 2.0;
+      Float_t nSigmaKaon_min_TPC = 2.0;
+      Float_t nSigmaProton_min_TPC = 2.0;
 
-      //Lirikk's QA before PID TOF check:
+
+      //Lirikk's QA before PID TPC & TPC+TOF check:
       hNSigmPion_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaPion());
-      
+      hdEdx_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->dEdx());
+
       //TPC only PID:
       if(picoTrack->pMom().Mag()<p_tot_prim_mid_PID) //p_min already set by track choise
       {
 
-      }//end of 
+        Bool_t is_nSigma_Pion_TPC = fabs(picoTrack->nSigmaPion())<nSigmaPion_max_TPC;
+        Bool_t is_nSigma_Kaon_TPC = fabs(picoTrack->nSigmaKaon())>nSigmaKaon_min_TPC;
+        Bool_t is_nSigma_Proton_TPC = fabs(picoTrack->nSigmaProton())>nSigmaProton_min_TPC;
+        Bool_t is_nSigma_Electron_TPC = fabs(picoTrack->nSigmaElectron())>nSigmaElectron_min_TPC;
+        if(is_nSigma_Pion_TPC && is_nSigma_Electron_TPC 
+            && is_nSigma_Kaon_TPC && is_nSigma_Proton_TPC)
+        {
+          //Fill after PID TPC only cut:
+          hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
+          hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
+        }
+
+      }//end of TPC only
       //TPC+TOF PID:
-      else if( picoTrack->isTofTrack() && p_tot_prim_mid_PID<picoTrack->pMom().Mag()) //p_max already set by track choise
+      else if( picoTrack->isTofTrack() && p_tot_prim_mid_PID<=picoTrack->pMom().Mag()) //p_max already set by track choise
       {
       StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex()); // Retrieve corresponding trait
 
@@ -390,19 +414,21 @@ int main(int argc, char* argv[]) {
       //QA histograms after TOF check before PID
       h1_OverBeta_vs_pPrimTotDevQ->Fill(PtotPrimQ,1./(trait->btofBeta()));
       hm2_vs_pPrimTotDevQ->Fill(PtotPrimQ,m_square);
-      h1_OverBetaDelta_vs_pPrimTotDevQ->Fill(PtotPrimQ, fabs(1./(trait->btofBeta()) - one_beta_expect));
+      h1_OverBetaDelta_vs_pPrimTotDevQ->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
       
-      Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max;
+      Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max_TOF;
       Bool_t is_1_beta_delta = fabs(1./(trait->btofBeta())-one_beta_expect)<one_over_beta_delta_max;
       Bool_t is_m2 = m2_min<m_square && m_square<m2_max;
       if(is_nSigma_Pion && is_1_beta_delta 
           && is_m2)
       {
-        //Fill hists after PID cut:
+        //Fill hists after PID TPC+TOF cut:
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
-        h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, fabs(1./(trait->btofBeta()) - one_beta_expect));
+        h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
+
+        hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
       }//end of PID
 
     }//end of TOF + TPC
