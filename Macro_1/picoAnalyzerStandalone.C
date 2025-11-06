@@ -155,16 +155,19 @@ int main(int argc, char* argv[]) {
           61, -0.5,60.5);
   TH1I *hNFitHits_cut = new TH1I("hNFitHits_cut", "Number of hits in TPC for track fit after cut",
           61, -0.5,60.5);
+
   TH1F *hDCA = new TH1F("hDCA", "DCA to ptimary vertex", 
           100, 0.0,5.0);
   TH1F *hDCA_cut = new TH1F("hDCA_cut", "DCA to ptimary vertex after cut", 
           100, 0.0,5.0);
+
   TH1F *hPrimaryPtrans = new TH1F("hPrimaryPtrans",
 				"Primary track trancverse momentum;p (GeV/c)",
 			       100, 0., 2. );
   TH1F *hPrimaryPtrans_cut = new TH1F("hPrimaryPttrans_cut",
 				   "Primary track transverce momentum after cut;p (GeV/c)",
 				  100, 0., 2. );
+
   TH1F *hPrimaryPseudorap = new TH1F("hPrimaryPseudorap",
 				   "Primary track pseudorapidity",
 				  100, -2., 2. );
@@ -199,8 +202,6 @@ int main(int argc, char* argv[]) {
   TH2F *hNSigmElectron_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmElectron_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(Electron) vs P_prim_tot/q after cut;;nSigma",
 			    200,-2.,2.,200,-10.,5.);
-  
-            
 
   TH2F *h1_OverBeta_vs_pPrimTotDevQ = new TH2F("1_OverBeta_vs_pPrimTotDevQ",
 			    "1/beta vs P_prim_tot/q;;1/beta",
@@ -221,7 +222,7 @@ int main(int argc, char* argv[]) {
 			    200,-2.,2.,200,-1.,10.);
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID",
 			    "1/beta - 1/beta_exp vs P_prim_tot/q after PID;;1/beta - 1/beta_exp",
-			    200,-2.,2.,200,-0.02,0.04);
+			    400,-2.,2.,200,-0.02,0.04);
 
   TH2F *hdEdx_vs_pPrimTotDevQ = new TH2F("hdEdx_vs_pPrimTotDevQ",
 			    "dE/dx vs P_prim_tot/q;;dE/dx(GeV/cm)",
@@ -229,6 +230,13 @@ int main(int argc, char* argv[]) {
   TH2F *hdEdx_vs_pPrimTotDevQ_cut_PID = new TH2F("hdEdx_vs_pPrimTotDevQ_cut_PID",
 			    "dE/dx vs P_prim_tot/q after PID;;dE/dx(GeV/cm)",
 			    200,-1.6,1.6,200,-0.2,10. );
+  
+  TH2F *h2DpPrimTr_vs_etaPtim = new TH2F("h2DpPrimTr_vs_etaPtim",
+			    "p_prim_T vs eta_prim;p_T;eta",
+			    200,-0.5,2.,200,-4.,4.);
+  TH2F *h2DpPrimTr_vs_etaPtim_cut = new TH2F("h2DpPrimTr_vs_etaPtim_cut",
+			    "p_prim_T vs eta_prim after track cut;p_T;eta",
+			    200,-0.5,2.,200,-4.,4.);
 
   // BTof pid traits
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
@@ -303,6 +311,7 @@ int main(int argc, char* argv[]) {
       hPrimaryPtot->Fill(picoTrack->pMom().Mag());
       hPrimaryPtrans->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap->Fill(picoTrack->pMom().Eta());
+      h2DpPrimTr_vs_etaPtim->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
     }
     
     //Track selection:
@@ -335,7 +344,7 @@ int main(int argc, char* argv[]) {
       hDCA_cut->Fill(picoTrack->gDCA(pVtx).Mag());
       hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
-
+      h2DpPrimTr_vs_etaPtim_cut->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
       
       
       //start of PID:
