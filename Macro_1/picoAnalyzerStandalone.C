@@ -25,6 +25,7 @@
 
 // C++ headers
 #include <iostream>
+#include <vector>
 
 // ROOT headers
 #include "TROOT.h"
@@ -35,6 +36,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TMath.h"
+#include <TLorentzVector.h>
 
 // PicoDst headers
 #include "StPicoDstReader.h"
@@ -246,6 +248,15 @@ int main(int argc, char* argv[]) {
   TH1F *hTofBeta = new TH1F("hTofBeta", "BTofPidTraits #beta;#beta",
 			    2000, 0., 2.);
 
+  //Correlation function:
+  TH1F *hA_q_inv = new TH1F("hA_q_inv",
+				   "Numerator of Corr.Funct",
+				  100, -1., 20. );
+
+  //let's create a c++ vector with 4-momenta of pions:
+  std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
+  std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
+
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
@@ -404,6 +415,11 @@ int main(int argc, char* argv[]) {
           hNSigmProton_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaProton());
           hNSigmElectron_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
           hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
+          //let's fill c++ vector of Pions after TPC only:
+          Double_t m_Pion = 0.13957039;//GeV
+          Double_t temp_pion_Energy_TPC_ONLY = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
+          TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TPC_ONLY);
+          Pions_4_momenta_Arr_TPC_ONLY.push_back(temp_four_vector);
         }
 
       }//end of TPC only
@@ -421,7 +437,7 @@ int main(int argc, char* argv[]) {
       
       //variables for QA:
       Double_t m_square = picoTrack->pMom().Mag2()*(1./((trait->btofBeta())*(trait->btofBeta()))-1.);
-      Double_t m_Pion = 0.13957039;
+      Double_t m_Pion = 0.13957039;//GeV
       Double_t one_beta_expect = sqrt(m_Pion*m_Pion+(picoTrack->pMom().Mag2()))/(picoTrack->pMom().Mag());
 
       //QA hists before PID but after TOF check (all that contains trait):
@@ -445,7 +461,10 @@ int main(int argc, char* argv[]) {
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
         h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
-        
+        //let's fill c++ vector of Pions after TPC & TOF:
+        Double_t temp_pion_Energy_TOF_TPC = picoTrack->pMom().Mag()/(trait->btofBeta());
+        TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TOF_TPC);
+        Pions_4_momenta_Arr_TOF_TPC.push_back(temp_four_vector);
       }//end of PID
 
     }//end of TOF + TPC
