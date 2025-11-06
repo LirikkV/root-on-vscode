@@ -479,9 +479,23 @@ int main(int argc, char* argv[]) {
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
-    Int_t N_of_Pions_TPC = Pions_4_momenta_Arr_TPC_ONLY.size();
-    
-    
+    if (!Pions_4_momenta_Arr_TPC_ONLY.empty())
+    {
+      Int_t N_of_Pions_TPC = Pions_4_momenta_Arr_TPC_ONLY.size();
+      for (Int_t i = 0; i < N_of_Pions_TPC; i++)
+      {
+        for (Int_t j = i+1; j < N_of_Pions_TPC; j++)
+        {
+          
+        }
+      }
+    }
+    if (!Pions_4_momenta_Arr_TOF_TPC.empty())
+    {
+
+      Int_t N_of_Pions_TOF_TPC = Pions_4_momenta_Arr_TOF_TPC.size();
+    }
+
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
