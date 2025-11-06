@@ -349,8 +349,18 @@ int main(int argc, char* argv[]) {
       hPrimaryPtrans_cut->Fill(picoTrack->pMom().Pt());
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
       h2DpPrimTr_vs_etaPtim_cut->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
-      
-      
+
+      //Lines of equal P at 2D hist P_prim_T VS Pseudorap
+      for(int i=1;i<=21;i+=2)
+      {
+        Bool_t is_P_const = (p_tot_prim_max-p_tot_prim_min)/(20.)*(i)<=picoTrack->pMom().Mag() &&
+                            picoTrack->pMom().Mag()<= (p_tot_prim_max-p_tot_prim_min)/(20.)*(i+1);
+        if(is_P_const)
+        {
+        h2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
+        }
+      }
+
       //start of PID:
       //variables for PID:
       Double_t PtotPrimQ = (picoTrack->pMom().Mag())/(picoTrack->charge());
