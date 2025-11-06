@@ -249,13 +249,15 @@ int main(int argc, char* argv[]) {
 			    2000, 0., 2.);
 
   //Correlation function:
-  TH1F *hA_q_inv = new TH1F("hA_q_inv",
-				   "Numerator of Corr.Funct",
+  TH1F *hA_q_inv_TPC_ONLY = new TH1F("hA_q_inv_TPC_ONLY",
+				   "Numerator of Corr.Funct only with TPC",
 				  100, -1., 20. );
-
-  //let's create a c++ vector with 4-momenta of pions:
-  std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
-  std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
+  TH1F *hA_q_inv_TPC_TOF = new TH1F("hA_q_inv_TPC_TOF",
+				   "Numerator of Corr.Funct only with TPC & TOF",
+				  100, -1., 20. );
+  TH1F *hA_q_inv_ALL = new TH1F("hA_q_inv_ALL",
+				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
+				  100, -1., 20. );
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -269,6 +271,10 @@ int main(int argc, char* argv[]) {
 		<< std::endl;
       break;
     }
+
+    //let's create a c++ vector with 4-momenta of pions in one event:
+    std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
+    std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
 
     // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
@@ -472,6 +478,9 @@ int main(int argc, char* argv[]) {
     }//end of track selection
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
+    //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
+    Int_t N_of_Pions_TPC = Pions_4_momenta_Arr_TPC_ONLY.size();
+    
     
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
