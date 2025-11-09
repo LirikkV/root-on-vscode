@@ -90,41 +90,7 @@ void Task_2_c()
 {
   srand((unsigned int)time(NULL));
 
-  /*
-  TH1D* hLandau = new TH1D("hLandau","Landau.txt histogramm", 100, -10.,40.);
-  TH1D* hMyGauss = new  TH1D("hMyGauss", "My Gauss generation", 100, -5.,5.);
-
-  ifstream file_Landau("Praktikum_2025_proga/Landau.txt");
-  if(!file_Landau.is_open())
-  {
-    cerr<< "File Landau.txt hasn't opened"<<endl;
-    return;
-  }
-
-  
-  const int STOP_MAX = 100000;
-  int STOP_check =0;
-  double value;
-  while(file_Landau>>value && STOP_check<STOP_MAX)
-  { 
-    hLandau->Fill(value);
-    hMyGauss->Fill(my_random_Gauss());
-    STOP_check++;
-  }
-  file_Landau.close();
-
-  TFile* file_output = new TFile("Praktikum_2025_proga/Output_task_2.root", "RECREATE");
-  hLandau->Write();
-  hMyGauss->Write();
-  file_output->Close();
-  */
-
-  double TEST_ARRAY[4]={0.,1.,2.,0.};
-  double a = stat_x_mean(TEST_ARRAY,4);
-  double b = stat_s(TEST_ARRAY,4);
-  double c =stat_gamma_1(TEST_ARRAY,4);
-  double d = stat_gamma_2(TEST_ARRAY,4);
-
+  //First part:
   int N_arr_size = 0;
   cout<<"Enter array's size:"<<endl;
   cin>>N_arr_size;
@@ -135,8 +101,58 @@ void Task_2_c()
   fill_random_0_1(Arr_0_1,N_arr_size);
   fill_random_Gauss(Arr_Gauss,N_arr_size);
 
-  cout<<Arr_Gauss[2]<<endl;
+  double x_mean_0_1 = stat_x_mean(Arr_0_1,N_arr_size);
+  double s_0_1 = stat_s(Arr_0_1,N_arr_size);
+  double gamma_1_0_1 =stat_gamma_1(Arr_0_1,N_arr_size);
+  double gamma_2_0_1 = stat_gamma_2(Arr_0_1,N_arr_size);
+
+  double x_mean_Gauss = stat_x_mean(Arr_Gauss,N_arr_size);
+  double s_Gauss = stat_s(Arr_Gauss,N_arr_size);
+  double gamma_1_Gauss =stat_gamma_1(Arr_Gauss,N_arr_size);
+  double gamma_2_Gauss = stat_gamma_2(Arr_Gauss,N_arr_size);
+
+  //output for [0,1]:
+  printf("\n%-30s","Uniformly distribution on [0,1]:");
+  printf("\n%-12s\t%-10s\t%-10s\t%-10s\t%-10s\n","", "x_mean", "s", "gamma 1", "gamma 2");
+  printf("%-12s\t%-14.8f\t%-14.8f\t%-14.8f\t%-14.8f\n","experimental:", x_mean_0_1, s_0_1, gamma_1_0_1, gamma_2_0_1);
+  printf("%-12s\t%-14.8f\t%-14.8f\t%-14.8f\t%-14.8f\n","theoretical:", 1/2., sqrt(1/12.), 0., -1.2);
+  //output for Gauss:
+  printf("\n%-30s","Gauss distribution:");
+  printf("\n%-12s\t%-10s\t%-10s\t%-10s\t%-10s\n","", "x_mean", "s", "gamma 1", "gamma 2");
+  printf("%-12s\t%-14.8f\t%-14.8f\t%-14.8f\t%-14.8f\n","experimental:", x_mean_Gauss, s_Gauss, gamma_1_Gauss, gamma_2_Gauss);
+  printf("%-12s\t%-14.8f\t%-14.8f\t%-14.8f\t%-14.8f\n","theoretical:", 0., 1., 0., 0.);
 
   delete[] Arr_Gauss;
   delete[] Arr_0_1;
+
+  //Second part:
+
+  // TH1D* hLandau = new TH1D("hLandau","Landau.txt histogramm", 100, -10.,40.);
+  // TH1D* hMyGauss = new  TH1D("hMyGauss", "My Gauss generation", 100, -5.,5.);
+
+  // ifstream file_Landau("Praktikum_2025_proga/Landau.txt");
+  // if(!file_Landau.is_open())
+  // {
+  //   cerr<< "File Landau.txt hasn't opened"<<endl;
+  //   return;
+  // }
+
+  
+  // const int STOP_MAX = 100000;
+  // int STOP_check =0;
+  // double value;
+  // while(file_Landau>>value && STOP_check<STOP_MAX)
+  // { 
+  //   hLandau->Fill(value);
+  //   hMyGauss->Fill(my_random_Gauss());
+  //   STOP_check++;
+  // }
+  // file_Landau.close();
+
+  // TFile* file_output = new TFile("Praktikum_2025_proga/Output_task_2.root", "RECREATE");
+  // hLandau->Write();
+  // hMyGauss->Write();
+
+  // file_output->Close();
+  
 }
