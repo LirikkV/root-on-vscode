@@ -127,32 +127,61 @@ void Task_2_c()
 
   //Second part:
 
-  // TH1D* hLandau = new TH1D("hLandau","Landau.txt histogramm", 100, -10.,40.);
-  // TH1D* hMyGauss = new  TH1D("hMyGauss", "My Gauss generation", 100, -5.,5.);
+  TH1D* hLandau = new TH1D("hLandau","Landau.txt histogramm", 100, -10.,40.);
+  TH1D* hMyGauss = new  TH1D("hMyGauss", "My Gauss generation", 100, -5.,5.);
 
-  // ifstream file_Landau("Praktikum_2025_proga/Landau.txt");
-  // if(!file_Landau.is_open())
-  // {
-  //   cerr<< "File Landau.txt hasn't opened"<<endl;
-  //   return;
-  // }
+  ifstream file_Landau("Praktikum_2025_proga/Landau.txt");
+  if(!file_Landau.is_open())
+  {
+    cerr<< "File Landau.txt didn't open"<<endl;
+    return;
+  }
 
-  
-  // const int STOP_MAX = 100000;
-  // int STOP_check =0;
-  // double value;
-  // while(file_Landau>>value && STOP_check<STOP_MAX)
-  // { 
-  //   hLandau->Fill(value);
-  //   hMyGauss->Fill(my_random_Gauss());
-  //   STOP_check++;
-  // }
-  // file_Landau.close();
+  int N_Landau =0;
+  double value = 0.;
 
-  // TFile* file_output = new TFile("Praktikum_2025_proga/Output_task_2.root", "RECREATE");
-  // hLandau->Write();
-  // hMyGauss->Write();
+  const int STOP_MAX = 100000;
+  int STOP_check =0;
+  //to measure size of .txt file:
+  while(file_Landau>>value && STOP_check<STOP_MAX)
+  {
+    N_Landau++;
 
-  // file_output->Close();
+    //hLandau->Fill(value);
+    hMyGauss->Fill(my_random_Gauss());
+    STOP_check++;
+  }
+  //now we have N_Landau. Let's create array with this size, fill it and calculate statistics
+  file_Landau.clear();//clearing flags, like eof
+  file_Landau.seekg(0);//pointer to begining of .txt
+
+  double* Arr_Landau = new double[N_Landau]();
+
+  for(int i=0; i<N_Landau;i++)
+  { 
+    file_Landau>>value;
+    Arr_Landau[i]=value;
+    hLandau->Fill(Arr_Landau[i]);
+  }
+  //now We have Landau array and size of it. let's calculate statistics!
+
+  double x_mean_Landau = stat_x_mean(Arr_Landau,N_Landau);
+  double s_Landau = stat_s(Arr_Landau,N_Landau);
+  double gamma_1_Landau =stat_gamma_1(Arr_Landau,N_Landau);
+  double gamma_2_Landau = stat_gamma_2(Arr_Landau,N_Landau);
+
+  printf("\n%-30s","Landau distribution:");
+  printf("\n%-12s\t%-10s\t%-10s\t%-10s\t%-10s\n","", "x_mean", "s", "gamma 1", "gamma 2");
+  printf("%-12s\t%-14.8f\t%-14.8f\t%-14.8f\t%-14.8f\n","experimental:", x_mean_Landau, s_Landau, gamma_1_Landau, gamma_2_Landau);
+
+  delete[] Arr_Landau;
+
+  file_Landau.close();
+
+  TFile* file_output = new TFile("Praktikum_2025_proga/Output_task_2.root", "RECREATE");
+  hLandau->Write();
+  hMyGauss->Write();
+
+  file_output->Close();
   
 }
