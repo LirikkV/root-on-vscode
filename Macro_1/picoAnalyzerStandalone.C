@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
 				  100, -0.1, 3.0 );
   TH1F *hA_q_inv_ALL = new TH1F("hA_q_inv_ALL",
 				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
-				  100, -0.1, 1.5 );
+				  100, -0.1, 3.0 );
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -509,6 +509,28 @@ int main(int argc, char* argv[]) {
         }
       }
     }
+
+    //let's mix Pions from TPC & TOF+TPC:
+    std::vector<TLorentzVector> all_Pions;
+    all_Pions.reserve(Pions_4_momenta_Arr_TPC_ONLY.size()+Pions_4_momenta_Arr_TOF_TPC.size());
+    all_Pions.insert(all_Pions.end(),Pions_4_momenta_Arr_TPC_ONLY.begin(),Pions_4_momenta_Arr_TPC_ONLY.end());
+    all_Pions.insert(all_Pions.end(),Pions_4_momenta_Arr_TOF_TPC.begin(),Pions_4_momenta_Arr_TOF_TPC.end());
+
+    if(!all_Pions.empty())
+    {
+      Int_t N_of_Pions = all_Pions.size();
+      for (Int_t i = 0; i < N_of_Pions; i++)
+      {
+        for (Int_t j = i+1; j < N_of_Pions; j++)
+        {
+          TLorentzVector delta_4_momenta = all_Pions[i]-all_Pions[j];
+          double_t q_inv = -delta_4_momenta.Mag();
+
+          hA_q_inv_ALL->Fill(q_inv);
+        }
+      }
+    }
+
 
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)

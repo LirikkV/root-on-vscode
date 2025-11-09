@@ -9,6 +9,9 @@
       "Program1.C": "cpp",
       "Femt_1.C": "cpp",
       "picoAnalyzerStandalone.C": "cpp",
+      "cmath": "cpp",
+      "iostream": "cpp",
+      "ratio": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
