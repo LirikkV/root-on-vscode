@@ -9,7 +9,7 @@
       "args": [
         "-l",
         "-q",
-        "Praktikum_2025_proga/Task_1_c.C+g"
+        "Praktikum_2025_proga/Task_2_c.C+g"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
