@@ -71,7 +71,8 @@
       "streambuf": "cpp",
       "thread": "cpp",
       "cinttypes": "cpp",
-      "typeinfo": "cpp"
+      "typeinfo": "cpp",
+      "Task_3_c.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
