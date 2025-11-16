@@ -26,6 +26,7 @@
 // C++ headers
 #include <iostream>
 #include <vector>
+#include <deque>
 
 // ROOT headers
 #include "TROOT.h"
@@ -53,6 +54,28 @@
 #include "StPicoEpdHit.h"
 
 //_________________
+void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
+                           const std::deque<std::vector<TLorentzVector>>& event_Queue,
+                           TH1F* hist_B)
+{
+  //loop over queue vectors of pions:
+  for(size_t i=0;i<event_Queue.size();i++)
+  {
+    //loop over pions from new event
+    for(size_t j=0;j<new_Pions_Arr.size();j++)
+    {
+      //loop over pions from selected queue event:
+      for(size_t k=0;k<event_Queue[i].size();k++)
+      {
+      TLorentzVector delta_4_momenta = new_Pions_Arr[j] - event_Queue[i][k];
+      double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+
+      hist_B->Fill(q_inv);
+      }
+    }
+  }
+}
+
 int main(int argc, char* argv[]) {
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
@@ -114,7 +137,7 @@ int main(int argc, char* argv[]) {
   // Event
   TH1F *hRefMult = new TH1F("hRefMult",
 			    "Reference multiplicity;refMult",
-			    500, -0.5, 499.5);
+			    500, -0.5, 600.);
   TH2F *hVtxXvsY = new TH2F("hVtxXvsY",
 			    "Vtx XvsY",
 			    200,-10.,10.,200,-10.,10.);
@@ -249,16 +272,15 @@ int main(int argc, char* argv[]) {
 			    2000, 0., 2.);
 
   //Correlation function:
-  TH1F *hA_q_inv_TPC_ONLY = new TH1F("hA_q_inv_TPC_ONLY",
-				   "Numerator of Corr.Funct only with TPC",
-				  100, -0.1, 1.2 );
-  TH1F *hA_q_inv_TOF_TPC = new TH1F("hA_q_inv_TOF_TPC",
-				   "Numerator of Corr.Funct only with TPC & TOF",
-				  100, -0.1, 3.0 );
+
   TH1F *hA_q_inv_ALL = new TH1F("hA_q_inv_ALL",
 				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
 				  100, -0.1, 3.0 );
-
+  
+  //for mixing events:
+  const Int_t BUFFER_SIZE = 5;
+  std::deque<std::vector<TLorentzVector>> Pions_mixed_4_momenta;
+  
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
@@ -275,6 +297,8 @@ int main(int argc, char* argv[]) {
     //let's create a c++ vector with 4-momenta of pions in one event:
     std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
     std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
+    std::vector<TLorentzVector> Pions_4_momenta_Arr_ALL;
+
 
     // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
@@ -388,17 +412,16 @@ int main(int argc, char* argv[]) {
       Float_t nSigmaProton_min_TPC = 2.0;
 
 
-      //QA before PID TPC & TPC+TOF check:
+      //QA before PID TPC or TPC+TOF check:
       hNSigmPion_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaPion());
       hNSigmKaon_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaKaon());
       hNSigmProton_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaProton());
       hNSigmElectron_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
       hdEdx_vs_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->dEdx());
       
-
-      //TPC only PID:
       Bool_t is_TPC_momenta_range = picoTrack->pMom().Mag()<p_tot_prim_mid_PID;
       Bool_t is_TPC_TOF_momenta_range = picoTrack->isTofTrack() && p_tot_prim_mid_PID<=picoTrack->pMom().Mag();
+      //TPC only PID:
       if(is_TPC_momenta_range) //p_min already set by track choise
       {
 
@@ -419,7 +442,8 @@ int main(int argc, char* argv[]) {
           Double_t m_Pion = 0.13957039;//GeV
           Double_t temp_pion_Energy_TPC_ONLY = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
           TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TPC_ONLY);
-          Pions_4_momenta_Arr_TPC_ONLY.push_back(temp_four_vector);
+
+          Pions_4_momenta_Arr_ALL.push_back(temp_four_vector);
         }
 
       }//end of TPC only
@@ -465,7 +489,8 @@ int main(int argc, char* argv[]) {
         Double_t m_Pion = 0.13957039;//GeV
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
         TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TOF_TPC);
-        Pions_4_momenta_Arr_TOF_TPC.push_back(temp_four_vector);
+
+        Pions_4_momenta_Arr_ALL.push_back(temp_four_vector);
       }//end of PID
 
     }//end of TOF + TPC
@@ -475,57 +500,39 @@ int main(int argc, char* argv[]) {
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
 
-    if (!Pions_4_momenta_Arr_TPC_ONLY.empty())//TPC only
+    if(!Pions_4_momenta_Arr_ALL.empty())
     {
-      Int_t N_of_Pions = Pions_4_momenta_Arr_TPC_ONLY.size();
+      Int_t N_of_Pions = Pions_4_momenta_Arr_ALL.size();
       for (Int_t i = 0; i < N_of_Pions; i++)
       {
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
-          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr_TPC_ONLY[i]-Pions_4_momenta_Arr_TPC_ONLY[j];
-          double_t q_inv = -delta_4_momenta.Mag();
-
-          hA_q_inv_TPC_ONLY->Fill(q_inv);
-        }
-      }
-    }
-
-    if (!Pions_4_momenta_Arr_TOF_TPC.empty())//TOF+TPC only
-    {
-      Int_t N_of_Pions = Pions_4_momenta_Arr_TOF_TPC.size();
-      for (Int_t i = 0; i < N_of_Pions; i++)
-      {
-        for (Int_t j = i+1; j < N_of_Pions; j++)
-        {
-          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr_TOF_TPC[i]-Pions_4_momenta_Arr_TOF_TPC[j];
-          double_t q_inv = -delta_4_momenta.Mag();
-
-          hA_q_inv_TOF_TPC->Fill(q_inv);
-        }
-      }
-    }
-
-    //let's mix Pions from TPC & TOF+TPC:
-    std::vector<TLorentzVector> all_Pions;
-    all_Pions.reserve(Pions_4_momenta_Arr_TPC_ONLY.size()+Pions_4_momenta_Arr_TOF_TPC.size());
-    all_Pions.insert(all_Pions.end(),Pions_4_momenta_Arr_TPC_ONLY.begin(),Pions_4_momenta_Arr_TPC_ONLY.end());
-    all_Pions.insert(all_Pions.end(),Pions_4_momenta_Arr_TOF_TPC.begin(),Pions_4_momenta_Arr_TOF_TPC.end());
-
-    if(!all_Pions.empty())
-    {
-      Int_t N_of_Pions = all_Pions.size();
-      for (Int_t i = 0; i < N_of_Pions; i++)
-      {
-        for (Int_t j = i+1; j < N_of_Pions; j++)
-        {
-          TLorentzVector delta_4_momenta = all_Pions[i]-all_Pions[j];
-          double_t q_inv = -delta_4_momenta.Mag();
+          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr_ALL[i]-Pions_4_momenta_Arr_ALL[j];
+          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
 
           hA_q_inv_ALL->Fill(q_inv);
         }
       }
     }
 
+    //let's mix events:
+    //queue structure: NEW element goes to FRONT --- OLD elements pops out of BACK
+
+    if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z())
+    {
+      //compare new vector of pions and all vectors of pions in qeue:
+      if(!Pions_mixed_4_momenta.empty())
+      {
+        
+      }
+      Pions_mixed_4_momenta.push_back(Pions_4_momenta_Arr_ALL);
+      // clear buffer:
+      if (Pions_mixed_4_momenta.size() >= BUFFER_SIZE)
+      {
+        Pions_mixed_4_momenta.pop_back(); // delete the oldes element
+      }
+    }
+    
 
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
