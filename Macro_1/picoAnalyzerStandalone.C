@@ -310,12 +310,6 @@ int main(int argc, char* argv[]) {
 
     // Track analysis
     Int_t nTracks = dst->numberOfTracks();
-    Int_t nMatrices = dst->numberOfTrackCovMatrices();
-    if(nTracks != nMatrices) {
-      //std::cout << "Number of tracks and matrices do not match!" << std::endl;
-    }
-    //std::cout << "Number of tracks in event: " << nTracks << std::endl;
-    
     // Track loop
     for(Int_t iTrk=0; iTrk<nTracks; iTrk++) {
 
