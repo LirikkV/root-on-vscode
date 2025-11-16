@@ -276,10 +276,13 @@ int main(int argc, char* argv[]) {
   TH1F *hA_q_inv_ALL = new TH1F("hA_q_inv_ALL",
 				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
 				  100, -0.1, 3.0 );
+  TH1F *hB_q_inv_ALL = new TH1F("hB_q_inv_ALL",
+				   "Denumerator of Corr.Funct with both TPC & TPC+TOF methods",
+				  100, -0.1, 3.0 );
   
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
-  std::deque<std::vector<TLorentzVector>> Pions_mixed_4_momenta;
+  std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom;
   
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -518,22 +521,17 @@ int main(int argc, char* argv[]) {
     //let's mix events:
     //queue structure: NEW element goes to FRONT --- OLD elements pops out of BACK
 
-    if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z())
+    if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z() && event->refMult()>0. && event->refMult()<60.)
     {
       //compare new vector of pions and all vectors of pions in qeue:
-      if(!Pions_mixed_4_momenta.empty())
-      {
-        
-      }
-      Pions_mixed_4_momenta.push_back(Pions_4_momenta_Arr_ALL);
+      comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_mix_queue_Arr_4_mom,hB_q_inv_ALL);
+      Pions_mix_queue_Arr_4_mom.push_back(Pions_4_momenta_Arr_ALL);
       // clear buffer:
-      if (Pions_mixed_4_momenta.size() >= BUFFER_SIZE)
+      if (Pions_mix_queue_Arr_4_mom.size() > BUFFER_SIZE)
       {
-        Pions_mixed_4_momenta.pop_back(); // delete the oldes element
+        Pions_mix_queue_Arr_4_mom.pop_front(); // delete the oldest element
       }
     }
-    
-
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
