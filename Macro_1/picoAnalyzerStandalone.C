@@ -468,7 +468,8 @@ int main(int argc, char* argv[]) {
         h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
         //let's fill c++ vector of Pions after TPC & TOF:
-        Double_t temp_pion_Energy_TOF_TPC = picoTrack->pMom().Mag()/(trait->btofBeta());
+        Double_t m_Pion = 0.13957039;//GeV
+        Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
         TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TOF_TPC);
         Pions_4_momenta_Arr_TOF_TPC.push_back(temp_four_vector);
       }//end of PID
