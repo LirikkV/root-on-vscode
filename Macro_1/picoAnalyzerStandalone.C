@@ -273,12 +273,12 @@ int main(int argc, char* argv[]) {
 
   //Correlation function:
 
-  TH1F *hA_q_inv_ALL = new TH1F("hA_q_inv_ALL",
+  TH1D *hA_q_inv_ALL = new TH1D("hA_q_inv_ALL",
 				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
-				  100, -0.1, 3.0 );
-  TH1F *hB_q_inv_ALL = new TH1F("hB_q_inv_ALL",
+				  300, 0., 3.0 );
+  TH1D *hB_q_inv_ALL = new TH1D("hB_q_inv_ALL",
 				   "Denumerator of Corr.Funct with both TPC & TPC+TOF methods",
-				  100, -0.1, 3.0 );
+				  300, 0., 3.0 );
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
@@ -286,6 +286,7 @@ int main(int argc, char* argv[]) {
   const Int_t nRefMultCuts = 10;
   const Double_t VzBins[nVzCuts+1] = {-40., -20., 0., 20., 40.};
   const Double_t RefMultBins[nRefMultCuts+1] = {0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600};
+  /*
   TH1D* hB_hists[nVzCuts][nRefMultCuts]; //array for 40 hists, first index - Vz, second index - RefMult
 
   for(int iVz=0;iVz<nVzCuts;iVz++)
@@ -298,6 +299,7 @@ int main(int argc, char* argv[]) {
       hB_hists[iVz][iRefM] = new TH1D(B_histName,B_histTitle,100,-0.1,3.0);
     }
   }
+  */
 
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
@@ -565,7 +567,7 @@ int main(int argc, char* argv[]) {
         if(is_prim_Vz_cut && is_Ref_Mult_cut)
         {
           //compare new vector of pions and all vectors of pions in qeue:
-          comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_Buffer[iVz][iRefM],hB_hists[iVz][iRefM]);
+          comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_Buffer[iVz][iRefM],hB_q_inv_ALL);
           Pions_Buffer[iVz][iRefM].push_back(Pions_4_momenta_Arr_ALL);
           // clear buffer:
           if(Pions_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
