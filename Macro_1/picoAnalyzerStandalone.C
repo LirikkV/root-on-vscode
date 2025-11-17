@@ -56,7 +56,7 @@
 //_________________
 void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
                            const std::deque<std::vector<TLorentzVector>>& event_Queue,
-                           TH1F* hist_B)
+                           TH1D* hist_B)
 {
   //loop over queue vectors of pions:
   for(size_t i=0;i<event_Queue.size();i++)
@@ -286,7 +286,7 @@ int main(int argc, char* argv[]) {
   const Int_t nRefMultCuts = 10;
   const Double_t VzBins[nVzCuts+1] = {-40., -20., 0., 20., 40.};
   const Double_t RefMultBins[nRefMultCuts+1] = {0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600};
-  TH1F* hB_hists[nVzCuts][nRefMultCuts]; //array for 40 hists, first index - Vz, second index - RefMult
+  TH1D* hB_hists[nVzCuts][nRefMultCuts]; //array for 40 hists, first index - Vz, second index - RefMult
 
   for(int iVz=0;iVz<nVzCuts;iVz++)
   {
@@ -295,7 +295,7 @@ int main(int argc, char* argv[]) {
       TString B_histName = Form("hist_%d_%d", iVz, iRefM);
       TString B_histTitle = Form("Denum. of CF Vz [%.0f,%.0f], RefMult [%.0f,%.0f]",VzBins[iVz],VzBins[iVz+1], 
                                                                         RefMultBins[iRefM],RefMultBins[iRefM + 1]);
-      hB_hists[iVz][iRefM] = new TH1F(B_histName,B_histTitle,100,-0.1,3.0);
+      hB_hists[iVz][iRefM] = new TH1D(B_histName,B_histTitle,100,-0.1,3.0);
     }
   }
 
