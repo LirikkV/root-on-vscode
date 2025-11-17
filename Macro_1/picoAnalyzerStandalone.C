@@ -54,6 +54,24 @@
 #include "StPicoEpdHit.h"
 
 //_________________
+void fill_A_qinv(const std::vector<TLorentzVector> Pions_4_momenta_Arr, TH1D* hist_A)
+{
+  if(!Pions_4_momenta_Arr.empty())
+    {
+      Int_t N_of_Pions = Pions_4_momenta_Arr.size();
+      for (Int_t i = 0; i < N_of_Pions; i++)
+      {
+        for (Int_t j = i+1; j < N_of_Pions; j++)
+        {
+          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr[i]-Pions_4_momenta_Arr[j];
+          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+
+          hist_A->Fill(q_inv);
+        }
+      }
+    }
+}
+
 void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
                            const std::deque<std::vector<TLorentzVector>>& event_Queue,
                            TH1D* hist_B)
@@ -75,6 +93,7 @@ void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
     }
   }
 }
+
 
 int main(int argc, char* argv[]) {
 
@@ -275,17 +294,17 @@ int main(int argc, char* argv[]) {
 
   TH1D *hA_Pi_Plus_q_inv_ALL = new TH1D("hA_Pi_Plus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				  1200, 0., 3.0 );
   TH1D *hB_Pi_Plus_q_inv_ALL = new TH1D("hB_Pi_Plus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				  1200, 0., 3.0 );
 
   TH1D *hA_Pi_Minus_q_inv_ALL = new TH1D("hA_Pi_Minus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				  1200, 0., 3.0 );
   TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				  1200, 0., 3.0 );
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
@@ -296,10 +315,13 @@ int main(int argc, char* argv[]) {
 
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
-  std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
-  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Buffer(
+  //std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
+  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Plus_Buffer(
                                           nVzCuts, 
                                           std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));//this is 4*10 queues from events; just 2D vector of previous queues for each cut
+  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Minus_Buffer(
+                                          nVzCuts, 
+                                          std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -536,52 +558,13 @@ int main(int argc, char* argv[]) {
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
-    //for Pi+Pi+ pairs:
-    if(!Pions_Plus_4_momenta_Arr_ALL.empty())
-    {
-      Int_t N_of_Pions = Pions_Plus_4_momenta_Arr_ALL.size();
-      for (Int_t i = 0; i < N_of_Pions; i++)
-      {
-        for (Int_t j = i+1; j < N_of_Pions; j++)
-        {
-          TLorentzVector delta_4_momenta = Pions_Plus_4_momenta_Arr_ALL[i]-Pions_Plus_4_momenta_Arr_ALL[j];
-          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+    //for Pi+Pi+ & Pi-Pi- pairs:
+    fill_A_qinv(Pions_Plus_4_momenta_Arr_ALL,hA_Pi_Plus_q_inv_ALL);
+    fill_A_qinv(Pions_Minus_4_momenta_Arr_ALL,hA_Pi_Minus_q_inv_ALL);
 
-          hA_Pi_Plus_q_inv_ALL->Fill(q_inv);
-        }
-      }
-    }
-    //for Pi-Pi- pairs:
-    if(!Pions_Minus_4_momenta_Arr_ALL.empty())
-    {
-      Int_t N_of_Pions = Pions_Minus_4_momenta_Arr_ALL.size();
-      for (Int_t i = 0; i < N_of_Pions; i++)
-      {
-        for (Int_t j = i+1; j < N_of_Pions; j++)
-        {
-          TLorentzVector delta_4_momenta = Pions_Minus_4_momenta_Arr_ALL[i]-Pions_Minus_4_momenta_Arr_ALL[j];
-          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
-
-          hA_Pi_Minus_q_inv_ALL->Fill(q_inv);
-        }
-      }
-    }
 
     //let's mix events:
     //queue structure: NEW element goes to BACK --- OLD elements pops out of FRONT
-
-    // if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z() && event->refMult()>0. && event->refMult()<60.)
-    // {
-    //   //compare new vector of pions and all vectors of pions in qeue:
-    //   comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_mix_queue_Arr_4_mom,hB_q_inv_ALL);
-    //   Pions_mix_queue_Arr_4_mom.push_back(Pions_4_momenta_Arr_ALL);
-    //   // clear buffer:
-    //   if (Pions_mix_queue_Arr_4_mom.size() > BUFFER_SIZE)
-    //   {
-    //     Pions_mix_queue_Arr_4_mom.pop_front(); // delete the oldest element
-    //   }
-    // }
-
     //cycle for each cut by Vz & RefMult:
     for(int iVz=0;iVz<nVzCuts;iVz++)
     {
@@ -592,12 +575,21 @@ int main(int argc, char* argv[]) {
         if(is_prim_Vz_cut && is_Ref_Mult_cut)
         {
           //compare new vector of pions and all vectors of pions in qeue:
-          comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_Buffer[iVz][iRefM],hB_q_inv_ALL);
-          Pions_Buffer[iVz][iRefM].push_back(Pions_4_momenta_Arr_ALL);
+          //for Pi+Pi+ & Pi-Pi- pions:
+          comparePionsFillHistB(Pions_Plus_4_momenta_Arr_ALL,Pions_Plus_Buffer[iVz][iRefM],hB_Pi_Plus_q_inv_ALL);
+          comparePionsFillHistB(Pions_Minus_4_momenta_Arr_ALL,Pions_Minus_Buffer[iVz][iRefM],hB_Pi_Minus_q_inv_ALL);
+
+          Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_Arr_ALL);
+          Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_Arr_ALL);
+
           // clear buffer:
-          if(Pions_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
+          if(Pions_Plus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
           {
-            Pions_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
+            Pions_Plus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
+          }
+          if(Pions_Minus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
+          {
+            Pions_Minus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
           }
 
         }
