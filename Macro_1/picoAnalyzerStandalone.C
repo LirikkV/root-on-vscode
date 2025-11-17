@@ -273,12 +273,19 @@ int main(int argc, char* argv[]) {
 
   //Correlation function:
 
-  TH1D *hA_q_inv_ALL = new TH1D("hA_q_inv_ALL",
-				   "Numerator of Corr.Funct with both TPC & TPC+TOF methods",
-				  300, 0., 3.0 );
-  TH1D *hB_q_inv_ALL = new TH1D("hB_q_inv_ALL",
-				   "Denumerator of Corr.Funct with both TPC & TPC+TOF methods",
-				  300, 0., 3.0 );
+  TH1D *hA_Pi_Plus_q_inv_ALL = new TH1D("hA_Pi_Plus_q_inv_ALL",
+				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
+				  600, 0., 3.0 );
+  TH1D *hB_Pi_Plus_q_inv_ALL = new TH1D("hB_Pi_Plus_q_inv_ALL",
+				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
+				  600, 0., 3.0 );
+
+  TH1D *hA_Pi_Minus_q_inv_ALL = new TH1D("hA_Pi_Minus_q_inv_ALL",
+				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
+				  600, 0., 3.0 );
+  TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
+				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
+				  600, 0., 3.0 );
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
@@ -286,20 +293,6 @@ int main(int argc, char* argv[]) {
   const Int_t nRefMultCuts = 10;
   const Double_t VzBins[nVzCuts+1] = {-40., -20., 0., 20., 40.};
   const Double_t RefMultBins[nRefMultCuts+1] = {0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600};
-  /*
-  TH1D* hB_hists[nVzCuts][nRefMultCuts]; //array for 40 hists, first index - Vz, second index - RefMult
-
-  for(int iVz=0;iVz<nVzCuts;iVz++)
-  {
-    for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
-    {
-      TString B_histName = Form("hist_%d_%d", iVz, iRefM);
-      TString B_histTitle = Form("Denum. of CF Vz [%.0f,%.0f], RefMult [%.0f,%.0f]",VzBins[iVz],VzBins[iVz+1], 
-                                                                        RefMultBins[iRefM],RefMultBins[iRefM + 1]);
-      hB_hists[iVz][iRefM] = new TH1D(B_histName,B_histTitle,100,-0.1,3.0);
-    }
-  }
-  */
 
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
@@ -322,9 +315,10 @@ int main(int argc, char* argv[]) {
     }
 
     //let's create a c++ vector with 4-momenta of pions in one event:
-    std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
-    std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
-    std::vector<TLorentzVector> Pions_4_momenta_Arr_ALL;
+    // std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
+    // std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
+    std::vector<TLorentzVector> Pions_Plus_4_momenta_Arr_ALL;
+    std::vector<TLorentzVector> Pions_Minus_4_momenta_Arr_ALL;
 
 
     // Retrieve picoDst
@@ -470,7 +464,15 @@ int main(int argc, char* argv[]) {
           Double_t temp_pion_Energy_TPC_ONLY = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
           TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TPC_ONLY);
 
-          Pions_4_momenta_Arr_ALL.push_back(temp_four_vector);
+          //separation to Pi+Pi+ & Pi-Pi- pairs
+          if(picoTrack->charge()>0.)
+          {
+            Pions_Plus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+          }
+          else if(picoTrack->charge()<0.)
+          {
+            Pions_Minus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+          }
         }
 
       }//end of TPC only
@@ -517,7 +519,15 @@ int main(int argc, char* argv[]) {
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
         TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TOF_TPC);
 
-        Pions_4_momenta_Arr_ALL.push_back(temp_four_vector);
+        //separation to Pi+Pi+ & Pi-Pi- pairs
+        if (picoTrack->charge() > 0.)
+        {
+          Pions_Plus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+        }
+        else if (picoTrack->charge() < 0.)
+        {
+          Pions_Minus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+        }
       }//end of PID
 
     }//end of TOF + TPC
@@ -526,18 +536,33 @@ int main(int argc, char* argv[]) {
     } //for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
-
-    if(!Pions_4_momenta_Arr_ALL.empty())
+    //for Pi+Pi+ pairs:
+    if(!Pions_Plus_4_momenta_Arr_ALL.empty())
     {
-      Int_t N_of_Pions = Pions_4_momenta_Arr_ALL.size();
+      Int_t N_of_Pions = Pions_Plus_4_momenta_Arr_ALL.size();
       for (Int_t i = 0; i < N_of_Pions; i++)
       {
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
-          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr_ALL[i]-Pions_4_momenta_Arr_ALL[j];
+          TLorentzVector delta_4_momenta = Pions_Plus_4_momenta_Arr_ALL[i]-Pions_Plus_4_momenta_Arr_ALL[j];
           double_t q_inv = sqrt(-delta_4_momenta.Mag2());
 
-          hA_q_inv_ALL->Fill(q_inv);
+          hA_Pi_Plus_q_inv_ALL->Fill(q_inv);
+        }
+      }
+    }
+    //for Pi-Pi- pairs:
+    if(!Pions_Minus_4_momenta_Arr_ALL.empty())
+    {
+      Int_t N_of_Pions = Pions_Minus_4_momenta_Arr_ALL.size();
+      for (Int_t i = 0; i < N_of_Pions; i++)
+      {
+        for (Int_t j = i+1; j < N_of_Pions; j++)
+        {
+          TLorentzVector delta_4_momenta = Pions_Minus_4_momenta_Arr_ALL[i]-Pions_Minus_4_momenta_Arr_ALL[j];
+          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+
+          hA_Pi_Minus_q_inv_ALL->Fill(q_inv);
         }
       }
     }
