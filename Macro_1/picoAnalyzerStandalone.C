@@ -280,6 +280,26 @@ int main(int argc, char* argv[]) {
 				   "Denumerator of Corr.Funct with both TPC & TPC+TOF methods",
 				  100, -0.1, 3.0 );
   
+  //cuts by Vz: 4 cats; Vz from -40 to 40
+  //cuts by refMult: 10 cuts; RefMult from 0 to 600
+  const Int_t nVzCuts = 4;
+  const Int_t nRefMultCuts = 10;
+  const Double_t VzBins[nVzCuts+1] = {-40., -20., 0., 20., 40.};
+  const Double_t RefMultBins[nRefMultCuts+1] = {0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600};
+  TH1F* hB_hists[nVzCuts][nRefMultCuts]; //array for 40 hists, first index - Vz, second index - RefMult
+
+  for(int iVz=0;iVz<nVzCuts;iVz++)
+  {
+    for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
+    {
+      TString histName = Form("hist_%d_%d", iVz, iRefM);
+      TString histTitle = Form("Denum. of CF Vz [%d,%d], RefMult[%d,%d]",VzBins[iVz],VzBins[iVz+1], 
+                                                                        RefMultBins[iRefM],RefMultBins[iRefM + 1]);
+      hB_hists[iVz][iRefM] = new TH1F(histName,histTitle,100,-0.1,3.0);
+    }
+  }
+
+
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
   std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom;
@@ -519,7 +539,7 @@ int main(int argc, char* argv[]) {
     }
 
     //let's mix events:
-    //queue structure: NEW element goes to FRONT --- OLD elements pops out of BACK
+    //queue structure: NEW element goes to BACK --- OLD elements pops out of FRONT
 
     if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z() && event->refMult()>0. && event->refMult()<60.)
     {
