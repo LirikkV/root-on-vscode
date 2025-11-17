@@ -293,7 +293,7 @@ int main(int argc, char* argv[]) {
     for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
     {
       TString B_histName = Form("hist_%d_%d", iVz, iRefM);
-      TString B_histTitle = Form("Denum. of CF Vz [%d,%d], RefMult[%d,%d]",VzBins[iVz],VzBins[iVz+1], 
+      TString B_histTitle = Form("Denum. of CF Vz [%.0f,%.0f], RefMult [%.0f,%.0f]",VzBins[iVz],VzBins[iVz+1], 
                                                                         RefMultBins[iRefM],RefMultBins[iRefM + 1]);
       hB_hists[iVz][iRefM] = new TH1F(B_histName,B_histTitle,100,-0.1,3.0);
     }
@@ -302,7 +302,9 @@ int main(int argc, char* argv[]) {
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
   std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
-  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Buffer;//this is 4*10 queues from events; just 2D vector of previous queues for each cut
+  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Buffer(
+                                          nVzCuts, 
+                                          std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));//this is 4*10 queues from events; just 2D vector of previous queues for each cut
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -541,17 +543,40 @@ int main(int argc, char* argv[]) {
     //let's mix events:
     //queue structure: NEW element goes to BACK --- OLD elements pops out of FRONT
 
-    if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z() && event->refMult()>0. && event->refMult()<60.)
+    // if(event->primaryVertex().Z()<20. && -20.<event->primaryVertex().Z() && event->refMult()>0. && event->refMult()<60.)
+    // {
+    //   //compare new vector of pions and all vectors of pions in qeue:
+    //   comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_mix_queue_Arr_4_mom,hB_q_inv_ALL);
+    //   Pions_mix_queue_Arr_4_mom.push_back(Pions_4_momenta_Arr_ALL);
+    //   // clear buffer:
+    //   if (Pions_mix_queue_Arr_4_mom.size() > BUFFER_SIZE)
+    //   {
+    //     Pions_mix_queue_Arr_4_mom.pop_front(); // delete the oldest element
+    //   }
+    // }
+
+    //cycle for each cut by Vz & RefMult:
+    for(int iVz=0;iVz<nVzCuts;iVz++)
     {
-      //compare new vector of pions and all vectors of pions in qeue:
-      comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_mix_queue_Arr_4_mom,hB_q_inv_ALL);
-      Pions_mix_queue_Arr_4_mom.push_back(Pions_4_momenta_Arr_ALL);
-      // clear buffer:
-      if (Pions_mix_queue_Arr_4_mom.size() > BUFFER_SIZE)
+      for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
       {
-        Pions_mix_queue_Arr_4_mom.pop_front(); // delete the oldest element
+        Bool_t is_prim_Vz_cut = VzBins[iVz]<event->primaryVertex().Z() && event->primaryVertex().Z()<VzBins[iVz+1];
+        Bool_t is_Ref_Mult_cut = RefMultBins[iRefM]<event->refMult() && event->refMult()<RefMultBins[iRefM+1];
+        if(is_prim_Vz_cut && is_Ref_Mult_cut)
+        {
+          //compare new vector of pions and all vectors of pions in qeue:
+          comparePionsFillHistB(Pions_4_momenta_Arr_ALL,Pions_Buffer[iVz][iRefM],hB_hists[iVz][iRefM]);
+          Pions_Buffer[iVz][iRefM].push_back(Pions_4_momenta_Arr_ALL);
+          // clear buffer:
+          if(Pions_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
+          {
+            Pions_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
+          }
+
+        }
       }
     }
+
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
 
