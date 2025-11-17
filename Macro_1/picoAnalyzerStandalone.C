@@ -292,18 +292,18 @@ int main(int argc, char* argv[]) {
   {
     for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
     {
-      TString histName = Form("hist_%d_%d", iVz, iRefM);
-      TString histTitle = Form("Denum. of CF Vz [%d,%d], RefMult[%d,%d]",VzBins[iVz],VzBins[iVz+1], 
+      TString B_histName = Form("hist_%d_%d", iVz, iRefM);
+      TString B_histTitle = Form("Denum. of CF Vz [%d,%d], RefMult[%d,%d]",VzBins[iVz],VzBins[iVz+1], 
                                                                         RefMultBins[iRefM],RefMultBins[iRefM + 1]);
-      hB_hists[iVz][iRefM] = new TH1F(histName,histTitle,100,-0.1,3.0);
+      hB_hists[iVz][iRefM] = new TH1F(B_histName,B_histTitle,100,-0.1,3.0);
     }
   }
 
-
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
-  std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom;
-  
+  std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
+  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Buffer;//this is 4*10 queues from events; just 2D vector of previous queues for each cut
+
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
