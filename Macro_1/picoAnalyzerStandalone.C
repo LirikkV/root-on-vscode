@@ -294,17 +294,17 @@ int main(int argc, char* argv[]) {
 
   TH1D *hA_Pi_Plus_q_inv_ALL = new TH1D("hA_Pi_Plus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  1200, 0., 3.0 );
+				  600, 0., 3.0 );
   TH1D *hB_Pi_Plus_q_inv_ALL = new TH1D("hB_Pi_Plus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  1200, 0., 3.0 );
+				  600, 0., 3.0 );
 
   TH1D *hA_Pi_Minus_q_inv_ALL = new TH1D("hA_Pi_Minus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  1200, 0., 3.0 );
+				  600, 0., 3.0 );
   TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  1200, 0., 3.0 );
+				  600, 0., 3.0 );
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
