@@ -293,18 +293,19 @@ int main(int argc, char* argv[]) {
   //Correlation function:
 
   TH1D *hA_Pi_Plus_q_inv_ALL = new TH1D("hA_Pi_Plus_q_inv_ALL",
-				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods;q_inv;A",
+				  1200, 0., 3.0 );
   TH1D *hB_Pi_Plus_q_inv_ALL = new TH1D("hB_Pi_Plus_q_inv_ALL",
-				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods;q_inv;B",
+				  1200, 0., 3.0 );
 
   TH1D *hA_Pi_Minus_q_inv_ALL = new TH1D("hA_Pi_Minus_q_inv_ALL",
-				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods;q_inv;A",
+				  1200, 0., 3.0 );
   TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
-				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods",
-				  600, 0., 3.0 );
+				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods;q_inv;B",
+				  1200, 0., 3.0 );
+  
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
@@ -324,7 +325,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<300/*events2read*/; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
