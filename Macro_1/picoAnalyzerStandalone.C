@@ -256,7 +256,7 @@ int main(int argc, char* argv[]) {
   
   TH2F *hm2_vs_pPrimTotDevQ = new TH2F("hm2_vs_pPrimTotDevQ",
 			    "m^2 vs P_prim_tot/q;;m^2(Gev/c)",
-			    200,-2.,2.,200,-1.,10.);
+			    400,-2.,2.,200,-0.1,0.1);
   TH2F *hm2_vs_pPrimTotDevQ_cut_PID = new TH2F("hm2_vs_pPrimTotDevQ_cut_PID",
 			    "m^2 vs P_prim_tot/q after PID;;m^2(Gev/c)",
 			    400,-2.,2.,200,-0.1,0.1);
@@ -325,7 +325,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<300/*events2read*/; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<events2read ; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
