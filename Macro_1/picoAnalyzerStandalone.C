@@ -269,10 +269,10 @@ int main(int argc, char* argv[]) {
 			    400,-2.,2.,200,-0.02,0.04);
 
   TH2F *hdEdx_vs_pPrimTotDevQ = new TH2F("hdEdx_vs_pPrimTotDevQ",
-			    "dE/dx vs P_prim_tot/q;;dE/dx(GeV/cm)",
+			    "dE/dx vs P_prim_tot/q;;dE/dx(keV/cm)",
 			    200,-1.6,1.6,200,-0.2,10.);
   TH2F *hdEdx_vs_pPrimTotDevQ_cut_PID = new TH2F("hdEdx_vs_pPrimTotDevQ_cut_PID",
-			    "dE/dx vs P_prim_tot/q after PID;;dE/dx(GeV/cm)",
+			    "dE/dx vs P_prim_tot/q after PID;;dE/dx(keV/cm)",
 			    200,-1.6,1.6,200,-0.2,10. );
   
   TH2F *h2DpPrimTr_vs_etaPtim = new TH2F("h2DpPrimTr_vs_etaPtim",
