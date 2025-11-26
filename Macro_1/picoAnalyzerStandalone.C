@@ -38,6 +38,7 @@
 #include "TH2.h"
 #include "TMath.h"
 #include <TLorentzVector.h>
+#include "TStopwatch.h"
 
 // PicoDst headers
 #include "StPicoDstReader.h"
@@ -102,6 +103,9 @@ int main(int argc, char* argv[]) {
 #else
   gSystem->Load("../libs/libStPicoDst.so");
 #endif
+
+  //let's see how much time program get:
+  TStopwatch timer;
 
   std::cout << "Hi! Lets do some physics, Master!" << std::endl;
 
@@ -606,4 +610,8 @@ int main(int argc, char* argv[]) {
 
   std::cout << "I'm done with analysis. We'll have a Nobel Prize, Master!"
 	    << std::endl;
+  
+  timer.Stop();
+  std::cout <<"Real time:"<< timer.RealTime()<<std::endl;
+  std::cout <<"CPU time:"<< timer.CpuTime()<<std::endl;
 }
