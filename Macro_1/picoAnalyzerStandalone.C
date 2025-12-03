@@ -54,8 +54,11 @@
 #include "StPicoETofHit.h"
 #include "StPicoEpdHit.h"
 
+//It's better use ROOT::Math::LorentzVector instead of TLorenzVector
+using My_LorenzVector = ROOT::Math::PxPyPzEVector;
+
 //_________________
-void fill_A_qinv(const std::vector<TLorentzVector> Pions_4_momenta_Arr, TH1D* hist_A)
+void fill_A_qinv(const std::vector<My_LorenzVector> Pions_4_momenta_Arr, TH1D* hist_A)
 {
   if(!Pions_4_momenta_Arr.empty())
     {
@@ -64,8 +67,8 @@ void fill_A_qinv(const std::vector<TLorentzVector> Pions_4_momenta_Arr, TH1D* hi
       {
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
-          TLorentzVector delta_4_momenta = Pions_4_momenta_Arr[i]-Pions_4_momenta_Arr[j];
-          double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+          My_LorenzVector delta_4_momenta = Pions_4_momenta_Arr[i]-Pions_4_momenta_Arr[j];
+          double_t q_inv = sqrt(-delta_4_momenta.M2());
 
           hist_A->Fill(q_inv);
         }
@@ -73,8 +76,8 @@ void fill_A_qinv(const std::vector<TLorentzVector> Pions_4_momenta_Arr, TH1D* hi
     }
 }
 
-void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
-                           const std::deque<std::vector<TLorentzVector>>& event_Queue,
+void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
+                           const std::deque<std::vector<My_LorenzVector>>& event_Queue,
                            TH1D* hist_B)
 {
   //loop over queue vectors of pions:
@@ -86,8 +89,8 @@ void comparePionsFillHistB(const std::vector<TLorentzVector>& new_Pions_Arr,
       //loop over pions from selected queue event:
       for(size_t k=0;k<event_Queue[i].size();k++)
       {
-      TLorentzVector delta_4_momenta = new_Pions_Arr[j] - event_Queue[i][k];
-      double_t q_inv = sqrt(-delta_4_momenta.Mag2());
+      My_LorenzVector delta_4_momenta = new_Pions_Arr[j] - event_Queue[i][k];
+      double_t q_inv = sqrt(-delta_4_momenta.M2());
 
       hist_B->Fill(q_inv);
       }
@@ -321,15 +324,15 @@ int main(int argc, char* argv[]) {
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
   //std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
-  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Plus_Buffer(
+  std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Plus_Buffer(
                                           nVzCuts, 
-                                          std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));//this is 4*10 queues from events; just 2D vector of previous queues for each cut
-  std::vector<std::vector<std::deque<std::vector<TLorentzVector>>>> Pions_Minus_Buffer(
+                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));//this is 4*10 queues from events; just 2D vector of previous queues for each cut
+  std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Minus_Buffer(
                                           nVzCuts, 
-                                          std::vector<std::deque<std::vector<TLorentzVector>>>(nRefMultCuts));
+                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<events2read ; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<1000/*events2read*/ ; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
@@ -344,8 +347,8 @@ int main(int argc, char* argv[]) {
     //let's create a c++ vector with 4-momenta of pions in one event:
     // std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
     // std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
-    std::vector<TLorentzVector> Pions_Plus_4_momenta_Arr_ALL;
-    std::vector<TLorentzVector> Pions_Minus_4_momenta_Arr_ALL;
+    std::vector<My_LorenzVector> Pions_Plus_4_momenta_Arr_ALL;
+    std::vector<My_LorenzVector> Pions_Minus_4_momenta_Arr_ALL;
 
 
     // Retrieve picoDst
@@ -489,7 +492,8 @@ int main(int argc, char* argv[]) {
           //let's fill c++ vector of Pions after TPC only:
           Double_t m_Pion = 0.13957039;//GeV
           Double_t temp_pion_Energy_TPC_ONLY = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
-          TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TPC_ONLY);
+          My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(), 
+                              picoTrack->pMom().Pz(), temp_pion_Energy_TPC_ONLY);
 
           //separation to Pi+Pi+ & Pi-Pi- pairs
           if(picoTrack->charge()>0.)
@@ -544,7 +548,8 @@ int main(int argc, char* argv[]) {
         //let's fill c++ vector of Pions after TPC & TOF:
         Double_t m_Pion = 0.13957039;//GeV
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
-        TLorentzVector temp_four_vector(picoTrack->pMom(),temp_pion_Energy_TOF_TPC);
+        My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(),
+                              picoTrack->pMom().Pz(), temp_pion_Energy_TOF_TPC);
 
         //separation to Pi+Pi+ & Pi-Pi- pairs
         if (picoTrack->charge() > 0.)
