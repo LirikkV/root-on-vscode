@@ -267,6 +267,13 @@ int main(int argc, char* argv[]) {
   TH2F *hm2_vs_pPrimTotDevQ_cut_PID = new TH2F("hm2_vs_pPrimTotDevQ_cut_PID",
 			    "m^2 vs P_prim_tot/q after PID;;m^2(Gev/c)",
 			    400,-2.,2.,200,-0.1,0.1);
+
+  TH2F *hTEST_P2_pPrimTotDevQ = new TH2F("hTEST_P2_pPrimTotDevQ",
+			    "P_tot^2 vs P_prim_tot/q;;m^2(Gev/c)",
+			    400,-2.,2.,200, 0.0,2.5);
+  TH2F *hTEST_Beta_pPrimTotDevQ = new TH2F("hTEST_sqrt_Beta_pPrimTotDevQ",
+			    "(1/Beta^2-1) vs P_prim_tot/q;;m^2(Gev/c)",
+			    400,-2.,2.,200,-0.1,0.1);
   
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ",
 			    "1/beta - 1/beta_exp vs P_prim_tot/q;;1/beta - 1/beta_exp",
@@ -332,7 +339,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<1000/*events2read*/ ; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<events2read ; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
@@ -529,6 +536,9 @@ int main(int argc, char* argv[]) {
       hm2_vs_pPrimTotDevQ->Fill(PtotPrimQ,m_square);
       h1_OverBetaDelta_vs_pPrimTotDevQ->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
       
+      hTEST_Beta_pPrimTotDevQ->Fill(PtotPrimQ,(1./((trait->btofBeta())*(trait->btofBeta()))-1.));
+      hTEST_P2_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->pMom().Mag2());
+
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max_TOF;
       Bool_t is_1_beta_delta = fabs(1./(trait->btofBeta())-one_beta_expect)<one_over_beta_delta_max;
       Bool_t is_m2 = m2_min<m_square && m_square<m2_max;
@@ -545,6 +555,7 @@ int main(int argc, char* argv[]) {
         h1_OverBeta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,1./(trait->btofBeta()));
         h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
+        
         //let's fill c++ vector of Pions after TPC & TOF:
         Double_t m_Pion = 0.13957039;//GeV
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
