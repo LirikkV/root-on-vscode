@@ -1,5 +1,6 @@
 #include "TFile.h"
 #include "TH1D.h"
+#include "TCanvas.h"
 
 void corrFunct_devide()
 {
@@ -27,6 +28,19 @@ TFile *f_out = new TFile("/home/lirikk/root-on-vscode/Output_Data_1/Output_file_
 CF_Pi_Plus->Write();
 CF_Pi_Minus->Write();
 
+TCanvas *c1 = new TCanvas("c1", "Canvas",800,600);
+hA_Plus->Draw();
+c1->SaveAs("/home/lirikk/root-on-vscode/Output_Data_1/hA_Plus.pdf");
+hB_Plus->Draw();
+c1->SaveAs("/home/lirikk/root-on-vscode/Output_Data_1/hB_Plus.pdf");
+CF_Pi_Plus->Draw();
+c1->SaveAs("/home/lirikk/root-on-vscode/Output_Data_1/hCF_Pi_Plus.pdf");
+
+
+
+// CF_Pi_Plus->GetXaxis()->SetRange
+// CF_Pi_Plus->Draw();
+// c1->SaveAs("/home/lirikk/root-on-vscode/Output_Data_1/hCF_Pi_Plus.pdf");
 
 f_out->Close();
 f->Close();
