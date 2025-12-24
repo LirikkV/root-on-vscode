@@ -166,10 +166,10 @@ int main(int argc, char* argv[]) {
 			    500, -0.5, 600.);
   TH2F *hVtxXvsY = new TH2F("hVtxXvsY",
 			    "Vtx XvsY",
-			    200,-10.,10.,200,-10.,10.);
+			    200,-3.5,3.5,200,-3.5,3.5);
   TH2F *hVtxXvsY_cut = new TH2F("hVtxXvsY_cut",
 			    "Vtx XvsY after event cut",
-			    200,-10.,10.,200,-10.,10.);
+			    200,-3.5,3.5,200,-3.5,3.5);
 
   TH1F *hVtxZ = new TH1F("hVtxZ","Vtx Z",
 			 140, -70., 70.);
@@ -177,12 +177,12 @@ int main(int argc, char* argv[]) {
 			 140, -70., 70.);
 
   // Track
-  TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
-			       "Global track momentum;p (GeV/c)",
-			       100, 0., 1. );
-  TH1F *hGlobalPtotCut = new TH1F("hGlobalPtotCut",
-				  "Global track momentum after cut;p (GeV/c)",
-				  100, 0., 1. );
+  // TH1F *hGlobalPtot = new TH1F("hGlobalPtot",
+	// 		       "Global track momentum;p (GeV/c)",
+	// 		       100, 0., 1. );
+  // TH1F *hGlobalPtotCut = new TH1F("hGlobalPtotCut",
+	// 			  "Global track momentum after cut;p (GeV/c)",
+	// 			  100, 0., 1. );
   TH1F *hPrimaryPtot = new TH1F("hPrimaryPtot",
 				"Primary track momentum;p (GeV/c)",
 			       100, 0., 2. );
@@ -190,17 +190,17 @@ int main(int argc, char* argv[]) {
 				   "Primary track momentum after track cut;p (GeV/c)",
 				  100, 0., 2. );
 
-  TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
-				   "Track transverse momentum;p_{T} (GeV/c)",
-				   200, 0., 2.);
+  // TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
+	// 			   "Track transverse momentum;p_{T} (GeV/c)",
+	// 			   200, 0., 2.);
 
-  TH2F *hGlobalPhiVsPt[2];
-  for(int i=0; i<2; i++) {
-    hGlobalPhiVsPt[i] = new TH2F(Form("hGlobalPhiVsPt_%d",i),
-				 Form("#phi vs. p_{T} for charge: %d;p_{T} (GeV/c);#phi (rad)", (i==0) ? 1 : -1),
-				 300, 0., 3.,
-				 630, -3.15, 3.15);
-  }     
+  // TH2F *hGlobalPhiVsPt[2];
+  // for(int i=0; i<2; i++) {
+  //   hGlobalPhiVsPt[i] = new TH2F(Form("hGlobalPhiVsPt_%d",i),
+	// 			 Form("#phi vs. p_{T} for charge: %d;p_{T} (GeV/c);#phi (rad)", (i==0) ? 1 : -1),
+	// 			 300, 0., 3.,
+	// 			 630, -3.15, 3.15);
+  // }     
       
   TH1I *hNFitHits = new TH1I("hNFitHits", "Number of hits in TPC for track fit",
           61, -0.5,60.5);
@@ -228,38 +228,38 @@ int main(int argc, char* argv[]) {
   
   TH2F *hNSigmPion_vs_pPrimTotDevQ = new TH2F("hNSigmPion_vs_pPrimTotDevQ",
 			    "nSigma(pion) vs P_prim_tot/q;;nSigma",
-			    200,-2.,2.,200,-60.,60.);
+			    200,-2.,2.,200,-40.,40.);
   TH2F *hNSigmPion_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmPion_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(pion) vs P_prim_tot/q after cut;;nSigma",
-			    200,-2.,2.,200,-5.,5.);
+			    200,-2.,2.,200,-40.,40.);
 
   TH2F *hNSigmKaon_vs_pPrimTotDevQ = new TH2F("hNSigmKaon_vs_pPrimTotDevQ",
 			    "nSigma(Kaon) vs P_prim_tot/q;;nSigma",
-			    200,-2.,2.,200,-60.,60.);
+			    200,-2.,2.,200,-40.,40.);
   TH2F *hNSigmKaon_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmKaon_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(Kaon) vs P_prim_tot/q after cut;;nSigma",
-			    200,-2.,2.,200,-30.,5.);
+			    200,-2.,2.,200,-40.,40.);
   
   TH2F *hNSigmProton_vs_pPrimTotDevQ = new TH2F("hNSigmProton_vs_pPrimTotDevQ",
 			    "nSigma(Proton) vs P_prim_tot/q;;nSigma",
-			    200,-2.,2.,200,-60.,60.);
+			    200,-2.,2.,200,-40.,40.);
   TH2F *hNSigmProton_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmProton_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(Proton) vs P_prim_tot/q after cut;;nSigma",
-			    200,-2.,2.,200,-35.,5.);
+			    200,-2.,2.,200,-40.,40.);
   
   TH2F *hNSigmElectron_vs_pPrimTotDevQ = new TH2F("hNSigmElectron_vs_pPrimTotDevQ",
 			    "nSigma(Electron) vs P_prim_tot/q;;nSigma",
-			    200,-2.,2.,200,-60.,60.);
+			    200,-2.,2.,200,-40.,40.);
   TH2F *hNSigmElectron_vs_pPrimTotDevQ_cut_PID = new TH2F("hNSigmElectron_vs_pPrimTotDevQ_cut_PID",
 			    "nSigma(Electron) vs P_prim_tot/q after cut;;nSigma",
-			    200,-2.,2.,200,-10.,5.);
+			    200,-2.,2.,200,-40.,40.);
 
   TH2F *h1_OverBeta_vs_pPrimTotDevQ = new TH2F("1_OverBeta_vs_pPrimTotDevQ",
 			    "1/beta vs P_prim_tot/q;;1/beta",
-			    200,-2.,2.,200,-1.,10.);
+			    200,-2.,2.,200,0.5,2.0);
   TH2F *h1_OverBeta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBeta_vs_pPrimTotDevQ_cut_PID",
 			    "1/beta vs P_prim_tot/q after PID;;1/beta",
-			    400,-2.,2.,200,0.95,1.1);
+			    400,-2.,2.,200,0.5,2.0);
   
   TH2F *hm2_vs_pPrimTotDevQ = new TH2F("hm2_vs_pPrimTotDevQ",
 			    "m^2 vs P_prim_tot/q;;m^2(Gev/c)",
@@ -277,10 +277,10 @@ int main(int argc, char* argv[]) {
   
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ",
 			    "1/beta - 1/beta_exp vs P_prim_tot/q;;1/beta - 1/beta_exp",
-			    200,-2.,2.,200,-1.,10.);
+			    200,-2.,2.,200,-0.2,1.2);
   TH2F *h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID = new TH2F("1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID",
 			    "1/beta - 1/beta_exp vs P_prim_tot/q after PID;;1/beta - 1/beta_exp",
-			    400,-2.,2.,200,-0.02,0.04);
+			    400,-2.,2.,200,-0.2,1.2);
 
   TH2F *hdEdx_vs_pPrimTotDevQ = new TH2F("hdEdx_vs_pPrimTotDevQ",
 			    "dE/dx vs P_prim_tot/q;;dE/dx(keV/cm)",
@@ -296,7 +296,7 @@ int main(int argc, char* argv[]) {
 			    "p_prim_T vs eta_prim after track cut;p_T;eta",
 			    200,-0.5,2.,200,-4.,4.);
         
-  TH2F *h2DpPrimTr_vs_etaPtim_equal_P = new TH2F("h2DpPrimTr_vs_etaPtim_equal_P",
+  TH2F *hTEST2DpPrimTr_vs_etaPtim_equal_P = new TH2F("hTEST2DpPrimTr_vs_etaPtim_equal_P",
 			    "p_prim_T vs eta_prim after track cut with equal P;p_T;eta",
 			    200,-0.5,2.,200,-4.,4.);
 
@@ -450,7 +450,7 @@ int main(int argc, char* argv[]) {
                             picoTrack->pMom().Mag()<= (p_tot_prim_max-p_tot_prim_min)/(20.)*(i+1);
         if(is_P_const)
         {
-        h2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
+        hTEST2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
         }
       }
 
@@ -619,6 +619,11 @@ int main(int argc, char* argv[]) {
 
     }//end of event selection
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
+
+
+  //Some beautify of histograms:
+  Double_t max_hNFitHits = hNFitHits->GetMaximum();
+  hNFitHits_cut->SetMaximum(max_hNFitHits);
 
   picoReader->Finish();
   oFile->Write();
