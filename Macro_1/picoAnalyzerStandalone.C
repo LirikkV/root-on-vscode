@@ -106,12 +106,17 @@ void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
         const double dpz = px1-queue_Pions_Arr[k].Pz();
         const double de = px1-queue_Pions_Arr[k].E();
 
-        double_t q_inv = sqrt(dpx*dpx+dpy*dpy+dpz*dpz-de*de);
+        const double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
+        if(q_inv_2>0.)
+        {
+        double_t q_inv = sqrt(q_inv_2);
+        hist_B->Fill(q_inv);
+        }
 
-      hist_B->Fill(q_inv);
       }
     }
   }
+
 
 }
 
