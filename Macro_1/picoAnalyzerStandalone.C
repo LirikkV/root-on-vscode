@@ -339,7 +339,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<events2read ; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<1000/*events2read*/ ; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
