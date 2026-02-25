@@ -333,7 +333,8 @@ int main(int argc, char* argv[]) {
   //std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
   std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Plus_Buffer(
                                           nVzCuts, 
-                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));//this is 4*10 queues from events; just 2D vector of previous queues for each cut
+                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
+                                          //this is 4*10 queues; each queue consists from events; just 2D vector of previous queues for each cut
   std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Minus_Buffer(
                                           nVzCuts, 
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
@@ -443,16 +444,16 @@ int main(int argc, char* argv[]) {
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
       h2DpPrimTr_vs_etaPtim_cut->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
 
-      //Lines of equal P at 2D hist P_prim_T VS Pseudorap
-      for(int i=1;i<=21;i+=2)
-      {
-        Bool_t is_P_const = (p_tot_prim_max-p_tot_prim_min)/(20.)*(i)<=picoTrack->pMom().Mag() &&
-                            picoTrack->pMom().Mag()<= (p_tot_prim_max-p_tot_prim_min)/(20.)*(i+1);
-        if(is_P_const)
-        {
-        hTEST2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
-        }
-      }
+      // //Lines of equal P at 2D hist P_prim_T VS Pseudorap
+      // for(int i=1;i<=21;i+=2)
+      // {
+      //   Bool_t is_P_const = (p_tot_prim_max-p_tot_prim_min)/(20.)*(i)<=picoTrack->pMom().Mag() &&
+      //                       picoTrack->pMom().Mag()<= (p_tot_prim_max-p_tot_prim_min)/(20.)*(i+1);
+      //   if(is_P_const)
+      //   {
+      //   hTEST2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
+      //   }
+      // }
 
       //start of PID:
       //variables for PID:
@@ -556,7 +557,7 @@ int main(int argc, char* argv[]) {
         h1_OverBetaDelta_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, 1./(trait->btofBeta()) - one_beta_expect);
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
         
-        //let's fill c++ vector of Pions after TPC & TOF:
+        //let's fill c++ vector of Pions after TPC & TOF PID:
         Double_t m_Pion = 0.13957039;//GeV
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
         My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(),
@@ -586,34 +587,33 @@ int main(int argc, char* argv[]) {
 
     //let's mix events:
     //queue structure: NEW element goes to BACK --- OLD elements pops out of FRONT
-    //cycle for each cut by Vz & RefMult:
-    for(int iVz=0;iVz<nVzCuts;iVz++)
+
+    
+    //instead of cycles better use BinarySearch to search for interval our event belongs to
+
+    Int_t iVz = TMath::BinarySearch(nVzCuts + 1, VzBins, (Double_t)event->primaryVertex().Z());
+    Int_t iRefM = TMath::BinarySearch(nRefMultCuts +1, RefMultBins, (Double_t)event->refMult());
+
+    //check indexies for preventing segmentation fault:
+    if(iVz>=0 && iVz<nVzCuts && iRefM>=0 && iRefM<nRefMultCuts)
     {
-      for(int iRefM=0;iRefM<nRefMultCuts;iRefM++)
+
+      // compare new vector of pions and all vectors of pions in qeue:
+      // for Pi+Pi+ & Pi-Pi- pions:
+      comparePionsFillHistB(Pions_Plus_4_momenta_Arr_ALL, Pions_Plus_Buffer[iVz][iRefM], hB_Pi_Plus_q_inv_ALL);
+      comparePionsFillHistB(Pions_Minus_4_momenta_Arr_ALL, Pions_Minus_Buffer[iVz][iRefM], hB_Pi_Minus_q_inv_ALL);
+
+      Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_Arr_ALL);
+      Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_Arr_ALL);
+
+      // clear buffer:
+      if (Pions_Plus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
       {
-        Bool_t is_prim_Vz_cut = VzBins[iVz]<event->primaryVertex().Z() && event->primaryVertex().Z()<VzBins[iVz+1];
-        Bool_t is_Ref_Mult_cut = RefMultBins[iRefM]<event->refMult() && event->refMult()<RefMultBins[iRefM+1];
-        if(is_prim_Vz_cut && is_Ref_Mult_cut)
-        {
-          //compare new vector of pions and all vectors of pions in qeue:
-          //for Pi+Pi+ & Pi-Pi- pions:
-          comparePionsFillHistB(Pions_Plus_4_momenta_Arr_ALL,Pions_Plus_Buffer[iVz][iRefM],hB_Pi_Plus_q_inv_ALL);
-          comparePionsFillHistB(Pions_Minus_4_momenta_Arr_ALL,Pions_Minus_Buffer[iVz][iRefM],hB_Pi_Minus_q_inv_ALL);
-
-          Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_Arr_ALL);
-          Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_Arr_ALL);
-
-          // clear buffer:
-          if(Pions_Plus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
-          {
-            Pions_Plus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
-          }
-          if(Pions_Minus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
-          {
-            Pions_Minus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
-          }
-
-        }
+        Pions_Plus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
+      }
+      if (Pions_Minus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
+      {
+        Pions_Minus_Buffer[iVz][iRefM].pop_front(); // delete the oldest element
       }
     }
 
