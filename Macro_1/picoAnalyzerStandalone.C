@@ -63,14 +63,26 @@ void fill_A_qinv(const std::vector<My_LorenzVector>& Pions_4_momenta_Arr, TH1D* 
   if(!Pions_4_momenta_Arr.empty())
     {
       Int_t N_of_Pions = Pions_4_momenta_Arr.size();
+
       for (Int_t i = 0; i < N_of_Pions; i++)
       {
+          const double px =  Pions_4_momenta_Arr[i].Px();
+          const double py = Pions_4_momenta_Arr[i].Py();
+          const double pz = Pions_4_momenta_Arr[i].Pz();
+          const double e = Pions_4_momenta_Arr[i].E();
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
-          My_LorenzVector delta_4_momenta = Pions_4_momenta_Arr[i]-Pions_4_momenta_Arr[j];
-          double_t q_inv = sqrt(-delta_4_momenta.M2());
+          const double dpx = px - Pions_4_momenta_Arr[j].Px();
+          const double dpy = py - Pions_4_momenta_Arr[j].Py();
+          const double dpz = pz - Pions_4_momenta_Arr[j].Pz();
+          const double de = e - Pions_4_momenta_Arr[j].E();
 
-          hist_A->Fill(q_inv);
+          double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
+          if(q_inv_2 > 0.)
+          {
+            double q_inv = sqrt(q_inv_2);
+            hist_A->Fill(q_inv);
+          }
         }
       }
     }
