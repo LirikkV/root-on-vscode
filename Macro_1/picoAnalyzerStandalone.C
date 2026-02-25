@@ -114,9 +114,9 @@ void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
       {
 
         const double dpx = px1-queue_Pions_Arr[k].Px();
-        const double dpy = px1-queue_Pions_Arr[k].Py();
-        const double dpz = px1-queue_Pions_Arr[k].Pz();
-        const double de = px1-queue_Pions_Arr[k].E();
+        const double dpy = py1-queue_Pions_Arr[k].Py();
+        const double dpz = pz1-queue_Pions_Arr[k].Pz();
+        const double de = e1-queue_Pions_Arr[k].E();
 
         const double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
         if(q_inv_2>0.)
@@ -374,7 +374,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<9000/*events2read*/ ; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
@@ -387,8 +387,6 @@ int main(int argc, char* argv[]) {
     }
 
     //let's create a c++ vector with 4-momenta of pions in one event:
-    // std::vector<TLorentzVector> Pions_4_momenta_Arr_TPC_ONLY;
-    // std::vector<TLorentzVector> Pions_4_momenta_Arr_TOF_TPC;
     std::vector<My_LorenzVector> Pions_Plus_4_momenta_Arr_ALL;
     std::vector<My_LorenzVector> Pions_Minus_4_momenta_Arr_ALL;
 
