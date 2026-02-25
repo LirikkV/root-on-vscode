@@ -75,27 +75,44 @@ void fill_A_qinv(const std::vector<My_LorenzVector>& Pions_4_momenta_Arr, TH1D* 
       }
     }
 }
-
+//this function compare pions from "new" event with events from buffer and fills Numerator of CF
 void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
                            const std::deque<std::vector<My_LorenzVector>>& event_Queue,
                            TH1D* hist_B)
 {
+  const size_t nNewPions = new_Pions_Arr.size();
+  const size_t nEventsInQueue = event_Queue.size();
+
   //loop over queue vectors of pions:
-  for(size_t i=0;i<event_Queue.size();i++)
+  for(size_t i=0;i<nEventsInQueue;i++)
   {
+    const std::vector<My_LorenzVector>& queue_Pions_Arr = event_Queue[i];
+    const size_t nQueuePions = queue_Pions_Arr.size();
+
     //loop over pions from new event
-    for(size_t j=0;j<new_Pions_Arr.size();j++)
+    for(size_t j=0;j<nNewPions;j++)
     {
+      const double px1 = new_Pions_Arr[j].Px();
+      const double py1 = new_Pions_Arr[j].Py();
+      const double pz1 = new_Pions_Arr[j].Pz();
+      const double e1 = new_Pions_Arr[j].E();
+
       //loop over pions from selected queue event:
-      for(size_t k=0;k<event_Queue[i].size();k++)
+      for(size_t k=0;k<nQueuePions;k++)
       {
-      My_LorenzVector delta_4_momenta = new_Pions_Arr[j] - event_Queue[i][k];
-      double_t q_inv = sqrt(-delta_4_momenta.M2());
+
+        const double dpx = px1-queue_Pions_Arr[k].Px();
+        const double dpy = px1-queue_Pions_Arr[k].Py();
+        const double dpz = px1-queue_Pions_Arr[k].Pz();
+        const double de = px1-queue_Pions_Arr[k].E();
+
+        double_t q_inv = sqrt(dpx*dpx+dpy*dpy+dpz*dpz-de*de);
 
       hist_B->Fill(q_inv);
       }
     }
   }
+
 }
 
 
