@@ -58,7 +58,7 @@
 using My_LorenzVector = ROOT::Math::PxPyPzEVector;
 
 //_________________
-void fill_A_qinv(const std::vector<My_LorenzVector> Pions_4_momenta_Arr, TH1D* hist_A)
+void fill_A_qinv(const std::vector<My_LorenzVector>& Pions_4_momenta_Arr, TH1D* hist_A)
 {
   if(!Pions_4_momenta_Arr.empty())
     {
@@ -339,7 +339,7 @@ int main(int argc, char* argv[]) {
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
 
   // Loop over events
-  for(Long64_t iEvent=0; iEvent<1000/*events2read*/ ; iEvent++) {
+  for(Long64_t iEvent=0; iEvent<9000/*events2read*/ ; iEvent++) {
 
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
