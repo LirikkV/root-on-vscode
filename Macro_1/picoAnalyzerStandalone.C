@@ -372,6 +372,11 @@ int main(int argc, char* argv[]) {
   std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Minus_Buffer(
                                           nVzCuts, 
                                           std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
+  
+
+  //let's create a c++ vector with 4-momenta of pions in one event:
+  std::vector<My_LorenzVector> Pions_Plus_4_momenta_Arr_ALL;
+  std::vector<My_LorenzVector> Pions_Minus_4_momenta_Arr_ALL;
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -386,10 +391,9 @@ int main(int argc, char* argv[]) {
       break;
     }
 
-    //let's create a c++ vector with 4-momenta of pions in one event:
-    std::vector<My_LorenzVector> Pions_Plus_4_momenta_Arr_ALL;
-    std::vector<My_LorenzVector> Pions_Minus_4_momenta_Arr_ALL;
-
+    //at each step we will clear vectors with 4-momenta of pions:
+    Pions_Plus_4_momenta_Arr_ALL.clear();
+    Pions_Minus_4_momenta_Arr_ALL.clear();
 
     // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
@@ -405,8 +409,8 @@ int main(int argc, char* argv[]) {
 
     TVector3 pVtx = event->primaryVertex();
     //QA hists before event selection:
-    hVtxXvsY->Fill( event->primaryVertex().X(), event->primaryVertex().Y() );
-    hVtxZ->Fill( event->primaryVertex().Z() );
+    hVtxXvsY->Fill( pVtx.X(), pVtx.Y() );
+    hVtxZ->Fill( pVtx.Z() );
 
     // Lirikk's cuts:
     // variables for event cut:
@@ -414,13 +418,13 @@ int main(int argc, char* argv[]) {
     double_t Vtx_z_Max = 40.0; // cm
 
     // Event selection:
-    Bool_t is_Vtx_r_cut = event->primaryVertex().Perp() < Vtx_r_Max;
-    Bool_t is_abs_Vtx_z_cut = fabs(event->primaryVertex().Z()) < Vtx_z_Max;
+    Bool_t is_Vtx_r_cut = pVtx.Perp() < Vtx_r_Max;
+    Bool_t is_abs_Vtx_z_cut = fabs(pVtx.Z()) < Vtx_z_Max;
     if (is_Vtx_r_cut && is_abs_Vtx_z_cut)
     {
       //QA hists after event cut:
-      hVtxXvsY_cut->Fill(event->primaryVertex().X(), event->primaryVertex().Y());
-      hVtxZ_cut->Fill(event->primaryVertex().Z());
+      hVtxXvsY_cut->Fill(pVtx.X(), pVtx.Y());
+      hVtxZ_cut->Fill(pVtx.Z());
       hRefMult->Fill( event->refMult() );
 
     // Track analysis
@@ -623,7 +627,7 @@ int main(int argc, char* argv[]) {
     
     //instead of cycles better use BinarySearch to search for interval our event belongs to
 
-    Int_t iVz = TMath::BinarySearch(nVzCuts + 1, VzBins, (Double_t)event->primaryVertex().Z());
+    Int_t iVz = TMath::BinarySearch(nVzCuts + 1, VzBins, (Double_t)pVtx.Z());
     Int_t iRefM = TMath::BinarySearch(nRefMultCuts +1, RefMultBins, (Double_t)event->refMult());
 
     //check indexies for preventing segmentation fault:
