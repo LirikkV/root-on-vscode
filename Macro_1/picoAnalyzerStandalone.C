@@ -28,6 +28,8 @@
 #include <vector>
 #include <deque>
 
+#include <bitset>
+
 // ROOT headers
 #include "TROOT.h"
 #include "TFile.h"
@@ -57,25 +59,30 @@
 //It's better use ROOT::Math::LorentzVector instead of TLorenzVector
 using My_LorenzVector = ROOT::Math::PxPyPzEVector;
 
+struct My_ParticleTrackInfo{
+  My_LorenzVector p4;
+  UInt_t trackHits_1;
+  UInt_t trackHits_2;
+};
 //_________________
-void fill_A_qinv(const std::vector<My_LorenzVector>& Pions_4_momenta_Arr, TH1D* hist_A)
+void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_Arr, TH1D* hist_A)
 {
-  if(!Pions_4_momenta_Arr.empty())
+  if(!Pions_4_momenta_hits_Arr.empty())
     {
-      Int_t N_of_Pions = Pions_4_momenta_Arr.size();
+      Int_t N_of_Pions = Pions_4_momenta_hits_Arr.size();
 
       for (Int_t i = 0; i < N_of_Pions; i++)
       {
-          const double px =  Pions_4_momenta_Arr[i].Px();
-          const double py = Pions_4_momenta_Arr[i].Py();
-          const double pz = Pions_4_momenta_Arr[i].Pz();
-          const double e = Pions_4_momenta_Arr[i].E();
+          const double px =  Pions_4_momenta_hits_Arr[i].p4.Px();
+          const double py = Pions_4_momenta_hits_Arr[i].p4.Py();
+          const double pz = Pions_4_momenta_hits_Arr[i].p4.Pz();
+          const double e = Pions_4_momenta_hits_Arr[i].p4.E();
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
-          const double dpx = px - Pions_4_momenta_Arr[j].Px();
-          const double dpy = py - Pions_4_momenta_Arr[j].Py();
-          const double dpz = pz - Pions_4_momenta_Arr[j].Pz();
-          const double de = e - Pions_4_momenta_Arr[j].E();
+          const double dpx = px - Pions_4_momenta_hits_Arr[j].p4.Px();
+          const double dpy = py - Pions_4_momenta_hits_Arr[j].p4.Py();
+          const double dpz = pz - Pions_4_momenta_hits_Arr[j].p4.Pz();
+          const double de = e - Pions_4_momenta_hits_Arr[j].p4.E();
 
           double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
           if(q_inv_2 > 0.)
@@ -88,8 +95,8 @@ void fill_A_qinv(const std::vector<My_LorenzVector>& Pions_4_momenta_Arr, TH1D* 
     }
 }
 //this function compare pions from "new" event with events from buffer and fills Numerator of CF
-void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
-                           const std::deque<std::vector<My_LorenzVector>>& event_Queue,
+void comparePionsFillHistB(const std::vector<My_ParticleTrackInfo>& new_Pions_Arr,
+                           const std::deque<std::vector<My_ParticleTrackInfo>>& event_Queue,
                            TH1D* hist_B)
 {
   const size_t nNewPions = new_Pions_Arr.size();
@@ -98,25 +105,25 @@ void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
   //loop over queue vectors of pions:
   for(size_t i=0;i<nEventsInQueue;i++)
   {
-    const std::vector<My_LorenzVector>& queue_Pions_Arr = event_Queue[i];
+    const std::vector<My_ParticleTrackInfo>& queue_Pions_Arr = event_Queue[i];
     const size_t nQueuePions = queue_Pions_Arr.size();
 
     //loop over pions from new event
     for(size_t j=0;j<nNewPions;j++)
     {
-      const double px1 = new_Pions_Arr[j].Px();
-      const double py1 = new_Pions_Arr[j].Py();
-      const double pz1 = new_Pions_Arr[j].Pz();
-      const double e1 = new_Pions_Arr[j].E();
+      const double px1 = new_Pions_Arr[j].p4.Px();
+      const double py1 = new_Pions_Arr[j].p4.Py();
+      const double pz1 = new_Pions_Arr[j].p4.Pz();
+      const double e1 = new_Pions_Arr[j].p4.E();
 
       //loop over pions from selected queue event:
       for(size_t k=0;k<nQueuePions;k++)
       {
 
-        const double dpx = px1-queue_Pions_Arr[k].Px();
-        const double dpy = py1-queue_Pions_Arr[k].Py();
-        const double dpz = pz1-queue_Pions_Arr[k].Pz();
-        const double de = e1-queue_Pions_Arr[k].E();
+        const double dpx = px1-queue_Pions_Arr[k].p4.Px();
+        const double dpy = py1-queue_Pions_Arr[k].p4.Py();
+        const double dpz = pz1-queue_Pions_Arr[k].p4.Pz();
+        const double de = e1-queue_Pions_Arr[k].p4.E();
 
         const double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
         if(q_inv_2>0.)
@@ -131,6 +138,10 @@ void comparePionsFillHistB(const std::vector<My_LorenzVector>& new_Pions_Arr,
 
 
 }
+// UInt_t getSplitLevel(const UInt_t& firstTrackHits, const UInt_t& secondTrackHits&)
+// {
+//   return(50);
+// }
 
 
 int main(int argc, char* argv[]) {
@@ -364,19 +375,19 @@ int main(int argc, char* argv[]) {
 
   //for mixing events:
   const Int_t BUFFER_SIZE = 5;
-  //std::deque<std::vector<TLorentzVector>> Pions_mix_queue_Arr_4_mom; //this is queue from events; just queue from vectors from 4-vectors of particle
-  std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Plus_Buffer(
+  //this is queue from events; just queue from vectors from 4-vectors and hits information of particle's track
+  std::vector<std::vector<std::deque<std::vector<My_ParticleTrackInfo>>>> Pions_Plus_Buffer(
                                           nVzCuts, 
-                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
+                                          std::vector<std::deque<std::vector<My_ParticleTrackInfo>>>(nRefMultCuts));
                                           //this is 4*10 queues; each queue consists from events; just 2D vector of previous queues for each cut
-  std::vector<std::vector<std::deque<std::vector<My_LorenzVector>>>> Pions_Minus_Buffer(
+  std::vector<std::vector<std::deque<std::vector<My_ParticleTrackInfo>>>> Pions_Minus_Buffer(
                                           nVzCuts, 
-                                          std::vector<std::deque<std::vector<My_LorenzVector>>>(nRefMultCuts));
+                                          std::vector<std::deque<std::vector<My_ParticleTrackInfo>>>(nRefMultCuts));
   
 
   //let's create a c++ vector with 4-momenta of pions in one event:
-  std::vector<My_LorenzVector> Pions_Plus_4_momenta_Arr_ALL;
-  std::vector<My_LorenzVector> Pions_Minus_4_momenta_Arr_ALL;
+  std::vector<My_ParticleTrackInfo> Pions_Plus_4_momenta_hits_Arr_ALL;
+  std::vector<My_ParticleTrackInfo> Pions_Minus_4_momenta_hits_Arr_ALL;
 
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
@@ -392,8 +403,8 @@ int main(int argc, char* argv[]) {
     }
 
     //at each step we will clear vectors with 4-momenta of pions:
-    Pions_Plus_4_momenta_Arr_ALL.clear();
-    Pions_Minus_4_momenta_Arr_ALL.clear();
+    Pions_Plus_4_momenta_hits_Arr_ALL.clear();
+    Pions_Minus_4_momenta_hits_Arr_ALL.clear();
 
     // Retrieve picoDst
     StPicoDst *dst = picoReader->picoDst();
@@ -480,17 +491,6 @@ int main(int argc, char* argv[]) {
       hPrimaryPseudorap_cut->Fill(picoTrack->pMom().Eta());
       h2DpPrimTr_vs_etaPtim_cut->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
 
-      // //Lines of equal P at 2D hist P_prim_T VS Pseudorap
-      // for(int i=1;i<=21;i+=2)
-      // {
-      //   Bool_t is_P_const = (p_tot_prim_max-p_tot_prim_min)/(20.)*(i)<=picoTrack->pMom().Mag() &&
-      //                       picoTrack->pMom().Mag()<= (p_tot_prim_max-p_tot_prim_min)/(20.)*(i+1);
-      //   if(is_P_const)
-      //   {
-      //   hTEST2DpPrimTr_vs_etaPtim_equal_P->Fill(picoTrack->pMom().Pt(),picoTrack->pMom().Eta());
-      //   }
-      // }
-
       //start of PID:
       //variables for PID:
       Double_t PtotPrimQ = (picoTrack->pMom().Mag())/(picoTrack->charge());
@@ -542,11 +542,12 @@ int main(int argc, char* argv[]) {
           //separation to Pi+Pi+ & Pi-Pi- pairs
           if(picoTrack->charge()>0.)
           {
-            Pions_Plus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+            //let's fill
+            Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
           }
           else if(picoTrack->charge()<0.)
           {
-            Pions_Minus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+            Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
           }
         }
 
@@ -602,11 +603,11 @@ int main(int argc, char* argv[]) {
         //separation to Pi+Pi+ & Pi-Pi- pairs
         if (picoTrack->charge() > 0.)
         {
-          Pions_Plus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+          Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
         }
         else if (picoTrack->charge() < 0.)
         {
-          Pions_Minus_4_momenta_Arr_ALL.push_back(temp_four_vector);
+          Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
         }
       }//end of PID
 
@@ -617,8 +618,8 @@ int main(int argc, char* argv[]) {
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
     //for Pi+Pi+ & Pi-Pi- pairs:
-    fill_A_qinv(Pions_Plus_4_momenta_Arr_ALL,hA_Pi_Plus_q_inv_ALL);
-    fill_A_qinv(Pions_Minus_4_momenta_Arr_ALL,hA_Pi_Minus_q_inv_ALL);
+    fill_A_qinv(Pions_Plus_4_momenta_hits_Arr_ALL,hA_Pi_Plus_q_inv_ALL);
+    fill_A_qinv(Pions_Minus_4_momenta_hits_Arr_ALL,hA_Pi_Minus_q_inv_ALL);
 
 
     //let's mix events:
@@ -636,11 +637,11 @@ int main(int argc, char* argv[]) {
 
       // compare new vector of pions and all vectors of pions in qeue:
       // for Pi+Pi+ & Pi-Pi- pions:
-      comparePionsFillHistB(Pions_Plus_4_momenta_Arr_ALL, Pions_Plus_Buffer[iVz][iRefM], hB_Pi_Plus_q_inv_ALL);
-      comparePionsFillHistB(Pions_Minus_4_momenta_Arr_ALL, Pions_Minus_Buffer[iVz][iRefM], hB_Pi_Minus_q_inv_ALL);
+      comparePionsFillHistB(Pions_Plus_4_momenta_hits_Arr_ALL, Pions_Plus_Buffer[iVz][iRefM], hB_Pi_Plus_q_inv_ALL);
+      comparePionsFillHistB(Pions_Minus_4_momenta_hits_Arr_ALL, Pions_Minus_Buffer[iVz][iRefM], hB_Pi_Minus_q_inv_ALL);
 
-      Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_Arr_ALL);
-      Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_Arr_ALL);
+      Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_hits_Arr_ALL);
+      Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_hits_Arr_ALL);
 
       // clear buffer:
       if (Pions_Plus_Buffer[iVz][iRefM].size() > BUFFER_SIZE)
