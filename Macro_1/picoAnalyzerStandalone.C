@@ -66,6 +66,7 @@ struct My_ParticleTrackInfo{
   UInt_t trHits_2;
 };
 //Spliting level: 
+const double maxSplitLevel = -0.2;
 //+1 if 01 or 10 at the same bit positions of two track hit info
 //-1 if 11
 // 0 if 00
@@ -108,20 +109,23 @@ void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_A
           const double e = Pions_4_momenta_hits_Arr[i].p4.E();
         for (Int_t j = i+1; j < N_of_Pions; j++)
         {
+          double SplitLevel = getSplitLevel(Pions_4_momenta_hits_Arr[j],Pions_4_momenta_hits_Arr[i]);
+          if(SplitLevel>maxSplitLevel)continue; //if SplitLevel is wery high - we stop iteration and get to next step over j
+
           const double dpx = px - Pions_4_momenta_hits_Arr[j].p4.Px();
           const double dpy = py - Pions_4_momenta_hits_Arr[j].p4.Py();
           const double dpz = pz - Pions_4_momenta_hits_Arr[j].p4.Pz();
           const double de = e - Pions_4_momenta_hits_Arr[j].p4.E();
 
-          //std::bitset<32>(int_number).to_string() - gets string in binary form
-          std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_1).to_string() <<"  "
-                   <<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_2).to_string()
-                   <<std::endl;
-          std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_1).to_string() <<"  "
-                   <<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_2).to_string()
-                   <<std::endl;
-          std::cout<<getSplitLevel(Pions_4_momenta_hits_Arr[j],Pions_4_momenta_hits_Arr[i])<<std::endl;
-          
+          // //std::bitset<32>(int_number).to_string() - gets string in binary form
+          // std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_1).to_string() <<"  "
+          //          <<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_2).to_string()
+          //          <<std::endl;
+          // std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_1).to_string() <<"  "
+          //          <<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_2).to_string()
+          //          <<std::endl;
+          // std::cout<<getSplitLevel(Pions_4_momenta_hits_Arr[j],Pions_4_momenta_hits_Arr[i])<<std::endl;
+
           double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
           if(q_inv_2 > 0.)
           {
@@ -157,6 +161,8 @@ void comparePionsFillHistB(const std::vector<My_ParticleTrackInfo>& new_Pions_Ar
       //loop over pions from selected queue event:
       for(size_t k=0;k<nQueuePions;k++)
       {
+        double SplitLevel = getSplitLevel(new_Pions_Arr[j],queue_Pions_Arr[k]);
+        if(SplitLevel>maxSplitLevel)continue;
 
         const double dpx = px1-queue_Pions_Arr[k].p4.Px();
         const double dpy = py1-queue_Pions_Arr[k].p4.Py();
