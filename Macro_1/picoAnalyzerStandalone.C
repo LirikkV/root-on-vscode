@@ -61,9 +61,38 @@ using My_LorenzVector = ROOT::Math::PxPyPzEVector;
 
 struct My_ParticleTrackInfo{
   My_LorenzVector p4;
-  UInt_t trackHits_1;
-  UInt_t trackHits_2;
+  Int_t Nhits;
+  UInt_t trHits_1;
+  UInt_t trHits_2;
 };
+//Spliting level: 
+//+1 if 01 or 10 at the same bit positions of two track hit info
+//-1 if 11
+// 0 if 00
+// __builtin_popcount(a) gives number of 1 in a in binary representation
+// 7 in binary is 111 =>__builtin_popcount(7)=3
+//31 = 1111 => __builtin_popcount(31)=5
+//if we compare 100 and 110, we get 0=(-1)+(+1)+(0) because it's pairs 11 01 00
+//so if we have: int a b
+//then xor(a,b) return +1 if 10 or 01 
+//at c++ xor(a,b) is a^b
+//__builtin_popcount(a^b) returnes number of 10 or 01 pairs
+//__builtin_popcount(a&b) returnes number of 11 pairs
+//00 pairs don't effect on sum
+
+//we need to start this sum from 8-th bit
+//0xFFFFFF00 = 11111111111111111111111100000000 - first bits from 0 to 7 are zeroes
+//0x1FFFFF =              111111111111111111111 - only first bits from 0 to 20 are not zeroes 
+//a&0xFFFFFF00 sets first 8 bits of a to 0
+double getSplitLevel(const My_ParticleTrackInfo& tr_1,const My_ParticleTrackInfo& tr_2)
+{
+  int plusOnes = __builtin_popcount( (tr_1.trHits_1^tr_2.trHits_1) & 0xFFFFFF00) +
+                    __builtin_popcount( (tr_1.trHits_2^tr_2.trHits_2) & 0x1FFFFF);
+
+  int minusOnes = __builtin_popcount( (tr_1.trHits_1&tr_2.trHits_1) & 0xFFFFFF00)+
+                     __builtin_popcount( (tr_1.trHits_2&tr_2.trHits_2) & 0x1FFFFF);
+  return(static_cast<double>(plusOnes-minusOnes)/(tr_1.Nhits+tr_2.Nhits));
+}
 //_________________
 void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_Arr, TH1D* hist_A)
 {
@@ -84,6 +113,15 @@ void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_A
           const double dpz = pz - Pions_4_momenta_hits_Arr[j].p4.Pz();
           const double de = e - Pions_4_momenta_hits_Arr[j].p4.E();
 
+          //std::bitset<32>(int_number).to_string() - gets string in binary form
+          std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_1).to_string() <<"  "
+                   <<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_2).to_string()
+                   <<std::endl;
+          std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_1).to_string() <<"  "
+                   <<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_2).to_string()
+                   <<std::endl;
+          std::cout<<getSplitLevel(Pions_4_momenta_hits_Arr[j],Pions_4_momenta_hits_Arr[i])<<std::endl;
+          
           double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
           if(q_inv_2 > 0.)
           {
@@ -138,10 +176,6 @@ void comparePionsFillHistB(const std::vector<My_ParticleTrackInfo>& new_Pions_Ar
 
 
 }
-// UInt_t getSplitLevel(const UInt_t& firstTrackHits, const UInt_t& secondTrackHits&)
-// {
-//   return(50);
-// }
 
 
 int main(int argc, char* argv[]) {
@@ -543,11 +577,11 @@ int main(int argc, char* argv[]) {
           if(picoTrack->charge()>0.)
           {
             //let's fill
-            Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+            Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
           }
           else if(picoTrack->charge()<0.)
           {
-            Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+            Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(),picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
           }
         }
 
@@ -603,11 +637,11 @@ int main(int argc, char* argv[]) {
         //separation to Pi+Pi+ & Pi-Pi- pairs
         if (picoTrack->charge() > 0.)
         {
-          Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+          Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
         }
         else if (picoTrack->charge() < 0.)
         {
-          Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+          Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
         }
       }//end of PID
 
