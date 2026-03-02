@@ -66,7 +66,7 @@ struct My_ParticleTrackInfo{
   UInt_t trHits_2;
 };
 //Spliting level: 
-const double maxSplitLevel = -0.2;
+const double maxSplitLevel = 1.2;
 //+1 if 01 or 10 at the same bit positions of two track hit info
 //-1 if 11
 // 0 if 00
@@ -87,12 +87,10 @@ const double maxSplitLevel = -0.2;
 //a&0xFFFFFF00 sets first 8 bits of a to 0
 double getSplitLevel(const My_ParticleTrackInfo& tr_1,const My_ParticleTrackInfo& tr_2)
 {
-  int plusOnes = __builtin_popcount( (tr_1.trHits_1^tr_2.trHits_1) & 0xFFFFFF00) +
-                    __builtin_popcount( (tr_1.trHits_2^tr_2.trHits_2) & 0x1FFFFF);
-
   int minusOnes = __builtin_popcount( (tr_1.trHits_1&tr_2.trHits_1) & 0xFFFFFF00)+
                      __builtin_popcount( (tr_1.trHits_2&tr_2.trHits_2) & 0x1FFFFF);
-  return(static_cast<double>(plusOnes-minusOnes)/(tr_1.Nhits+tr_2.Nhits));
+  int sumNhits = tr_1.Nhits+tr_2.Nhits;
+  return(static_cast<double>(sumNhits - 3 * minusOnes) / sumNhits);
 }
 //_________________
 void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_Arr, TH1D* hist_A)
@@ -393,17 +391,17 @@ int main(int argc, char* argv[]) {
 
   TH1D *hA_Pi_Plus_q_inv_ALL = new TH1D("hA_Pi_Plus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods;q_inv;A",
-				  1200, 0., 3.0 );
+				  375, 0., 3.0 );
   TH1D *hB_Pi_Plus_q_inv_ALL = new TH1D("hB_Pi_Plus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi+ Pi+ with both TPC & TPC+TOF methods;q_inv;B",
-				  1200, 0., 3.0 );
+				  375, 0., 3.0 );
 
   TH1D *hA_Pi_Minus_q_inv_ALL = new TH1D("hA_Pi_Minus_q_inv_ALL",
 				   "Numerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods;q_inv;A",
-				  1200, 0., 3.0 );
+				  375, 0., 3.0 );
   TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods;q_inv;B",
-				  1200, 0., 3.0 );
+				  375, 0., 3.0 );
   
   
   //cuts by Vz: 4 cats; Vz from -40 to 40
