@@ -411,10 +411,10 @@ int main(int argc, char* argv[]) {
 				  375, 0., 3.0 );
   //Splittiong level:
   TH2F *hSL_A = new TH2F("SL_vs_qinv_A",
-			    "Split level vs q_inv A;SL;q_inv",
+			    "Split level vs q_inv A;q_inv;SL",
 			    400,-0.,0.2,200,-0.5,1.);
   TH2F *hSL_B = new TH2F("SL_vs_qinv_B",
-			    "Split level vs q_inv B;SL;q_inv",
+			    "Split level vs q_inv B;q_inv;SL",
 			    400,-0.,0.2,200,-0.5,1.);
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
