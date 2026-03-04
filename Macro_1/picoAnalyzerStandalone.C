@@ -66,7 +66,7 @@ struct My_ParticleTrackInfo{
   UInt_t trHits_2;
 };
 //Spliting level: 
-const double maxSplitLevel = 1.2;
+const double maxSplitLevel = 50.1;
 //+1 if 01 or 10 at the same bit positions of two track hit info
 //-1 if 11
 // 0 if 00
@@ -93,7 +93,7 @@ double getSplitLevel(const My_ParticleTrackInfo& tr_1,const My_ParticleTrackInfo
   return(static_cast<double>(sumNhits - 3 * minusOnes) / sumNhits);
 }
 //_________________
-void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_Arr, TH1D* hist_A)
+void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_Arr, TH1D* hist_A, TH2F* hSL_A)
 {
   if(!Pions_4_momenta_hits_Arr.empty())
     {
@@ -116,6 +116,10 @@ void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_A
           const double de = e - Pions_4_momenta_hits_Arr[j].p4.E();
 
           // //std::bitset<32>(int_number).to_string() - gets string in binary form
+          // std::cout<<Pions_4_momenta_hits_Arr[j].trHits_1 <<"  "
+          //          <<Pions_4_momenta_hits_Arr[j].trHits_2<<std::endl;
+          // std::cout<<Pions_4_momenta_hits_Arr[i].trHits_1<<"  "
+          //          <<Pions_4_momenta_hits_Arr[i].trHits_2<<std::endl;
           // std::cout<<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_1).to_string() <<"  "
           //          <<std::bitset<32>(Pions_4_momenta_hits_Arr[j].trHits_2).to_string()
           //          <<std::endl;
@@ -123,11 +127,13 @@ void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_A
           //          <<std::bitset<32>(Pions_4_momenta_hits_Arr[i].trHits_2).to_string()
           //          <<std::endl;
           // std::cout<<getSplitLevel(Pions_4_momenta_hits_Arr[j],Pions_4_momenta_hits_Arr[i])<<std::endl;
+          // std::cout<<Pions_4_momenta_hits_Arr[j].Nhits<<" "<< Pions_4_momenta_hits_Arr[i].Nhits<<std::endl;
 
           double q_inv_2 = dpx*dpx+dpy*dpy+dpz*dpz-de*de;
           if(q_inv_2 > 0.)
           {
             double q_inv = sqrt(q_inv_2);
+            hSL_A->Fill(q_inv, SplitLevel);
             hist_A->Fill(q_inv);
           }
         }
@@ -137,7 +143,7 @@ void fill_A_qinv(const std::vector<My_ParticleTrackInfo>& Pions_4_momenta_hits_A
 //this function compare pions from "new" event with events from buffer and fills Numerator of CF
 void comparePionsFillHistB(const std::vector<My_ParticleTrackInfo>& new_Pions_Arr,
                            const std::deque<std::vector<My_ParticleTrackInfo>>& event_Queue,
-                           TH1D* hist_B)
+                           TH1D* hist_B, TH2F* hSL_B)
 {
   const size_t nNewPions = new_Pions_Arr.size();
   const size_t nEventsInQueue = event_Queue.size();
@@ -171,6 +177,7 @@ void comparePionsFillHistB(const std::vector<My_ParticleTrackInfo>& new_Pions_Ar
         if(q_inv_2>0.)
         {
         double_t q_inv = sqrt(q_inv_2);
+        hSL_B->Fill(q_inv, SplitLevel);
         hist_B->Fill(q_inv);
         }
 
@@ -402,8 +409,13 @@ int main(int argc, char* argv[]) {
   TH1D *hB_Pi_Minus_q_inv_ALL = new TH1D("hB_Pi_Minus_q_inv_ALL",
 				   "Denumerator of Corr.Funct Pi- Pi- with both TPC & TPC+TOF methods;q_inv;B",
 				  375, 0., 3.0 );
-  
-  
+  //Splittiong level:
+  TH2F *hSL_A = new TH2F("SL_vs_qinv_A",
+			    "Split level vs q_inv A;SL;q_inv",
+			    400,-0.,0.2,200,-0.5,1.);
+  TH2F *hSL_B = new TH2F("SL_vs_qinv_B",
+			    "Split level vs q_inv B;SL;q_inv",
+			    400,-0.,0.2,200,-0.5,1.);
   //cuts by Vz: 4 cats; Vz from -40 to 40
   //cuts by refMult: 10 cuts; RefMult from 0 to 600
   const Int_t nVzCuts = 4;
@@ -656,8 +668,8 @@ int main(int argc, char* argv[]) {
 
     //now let's build A(q_inv) - Numerator of correlation function (Pions from one event):
     //for Pi+Pi+ & Pi-Pi- pairs:
-    fill_A_qinv(Pions_Plus_4_momenta_hits_Arr_ALL,hA_Pi_Plus_q_inv_ALL);
-    fill_A_qinv(Pions_Minus_4_momenta_hits_Arr_ALL,hA_Pi_Minus_q_inv_ALL);
+    fill_A_qinv(Pions_Plus_4_momenta_hits_Arr_ALL,hA_Pi_Plus_q_inv_ALL,hSL_A);
+    fill_A_qinv(Pions_Minus_4_momenta_hits_Arr_ALL,hA_Pi_Minus_q_inv_ALL,hSL_A);
 
 
     //let's mix events:
@@ -675,8 +687,8 @@ int main(int argc, char* argv[]) {
 
       // compare new vector of pions and all vectors of pions in qeue:
       // for Pi+Pi+ & Pi-Pi- pions:
-      comparePionsFillHistB(Pions_Plus_4_momenta_hits_Arr_ALL, Pions_Plus_Buffer[iVz][iRefM], hB_Pi_Plus_q_inv_ALL);
-      comparePionsFillHistB(Pions_Minus_4_momenta_hits_Arr_ALL, Pions_Minus_Buffer[iVz][iRefM], hB_Pi_Minus_q_inv_ALL);
+      comparePionsFillHistB(Pions_Plus_4_momenta_hits_Arr_ALL, Pions_Plus_Buffer[iVz][iRefM], hB_Pi_Plus_q_inv_ALL,hSL_B);
+      comparePionsFillHistB(Pions_Minus_4_momenta_hits_Arr_ALL, Pions_Minus_Buffer[iVz][iRefM], hB_Pi_Minus_q_inv_ALL,hSL_B);
 
       Pions_Plus_Buffer[iVz][iRefM].push_back(Pions_Plus_4_momenta_hits_Arr_ALL);
       Pions_Minus_Buffer[iVz][iRefM].push_back(Pions_Minus_4_momenta_hits_Arr_ALL);
