@@ -57,6 +57,7 @@
 #include "StPicoEpdHit.h"
 
 //It's better use ROOT::Math::LorentzVector instead of TLorenzVector
+const Double_t m_Pion = 0.13957039;//GeV
 using My_LorenzVector = ROOT::Math::PxPyPzEVector;
 
 struct My_ParticleTrackInfo{
@@ -66,7 +67,7 @@ struct My_ParticleTrackInfo{
   UInt_t trHits_2;
 };
 //Spliting level: 
-const double maxSplitLevel = 50.1;
+const double maxSplitLevel = 0.7;
 //+1 if 01 or 10 at the same bit positions of two track hit info
 //-1 if 11
 // 0 if 00
@@ -442,9 +443,10 @@ int main(int argc, char* argv[]) {
   // Loop over events
   for(Long64_t iEvent=0; iEvent<events2read; iEvent++) {
 
+    if(iEvent%100 == 0){
     std::cout << "Working on event #[" << (iEvent+1)
 	      << "/" << events2read << "]" << std::endl;
-
+    }
     Bool_t readEvent = picoReader->readPicoEvent(iEvent);
     if( !readEvent ) {
       std::cout << "Something went wrong, Master! Nothing to analyze..."
@@ -520,18 +522,20 @@ int main(int argc, char* argv[]) {
     Double_t pseudo_rap_prim_max = 1.0;
     //track selection:
     Bool_t is_N_TPC_fit_hits_cut = picoTrack->nHitsFit()>=N_TPC_fit_hits_min;
+    if(!is_N_TPC_fit_hits_cut) continue;
+    Bool_t is_DCA_abs_cut = picoTrack->gDCA(pVtx).Mag()<DCA_max;
+    if(!is_DCA_abs_cut) continue;
+    Bool_t is_pseudo_prm_cut = picoTrack->isPrimary() &&
+                            fabs(picoTrack->pMom().Eta())<pseudo_rap_prim_max;
+    if(!is_pseudo_prm_cut) continue;
     Bool_t is_p_tot_prim_cut = picoTrack->isPrimary() && 
                             p_tot_prim_min < picoTrack->pMom().Mag() &&
                             picoTrack->pMom().Mag()<p_tot_prim_max;
-    Bool_t is_DCA_abs_cut = picoTrack->gDCA(pVtx).Mag()<DCA_max;
+    if(!is_p_tot_prim_cut) continue;
     Bool_t is_p_trans_prim_cut = picoTrack->isPrimary() && 
                             p_trans_prim_min<picoTrack->pMom().Pt() &&
                             picoTrack->pMom().Pt()<p_trans_prim_max;
-    Bool_t is_pseudo_prm_cut = picoTrack->isPrimary() &&
-                            fabs(picoTrack->pMom().Eta())<pseudo_rap_prim_max;
-    if(is_N_TPC_fit_hits_cut && is_p_tot_prim_cut && 
-      is_DCA_abs_cut && is_p_trans_prim_cut && 
-      is_pseudo_prm_cut) 
+    if(is_p_trans_prim_cut) 
     {
       //QA after track selection:
       hNFitHits_cut->Fill(picoTrack->nHitsFit());
@@ -571,11 +575,13 @@ int main(int argc, char* argv[]) {
       {
 
         Bool_t is_nSigma_Pion_TPC = fabs(picoTrack->nSigmaPion())<nSigmaPion_max_TPC;
+        if(!is_nSigma_Pion_TPC) continue;
         Bool_t is_nSigma_Kaon_TPC = fabs(picoTrack->nSigmaKaon())>nSigmaKaon_min_TPC;
+        if(!is_nSigma_Kaon_TPC) continue;
         Bool_t is_nSigma_Proton_TPC = fabs(picoTrack->nSigmaProton())>nSigmaProton_min_TPC;
+        if(!is_nSigma_Proton_TPC) continue;
         Bool_t is_nSigma_Electron_TPC = fabs(picoTrack->nSigmaElectron())>nSigmaElectron_min_TPC;
-        if(is_nSigma_Pion_TPC && is_nSigma_Electron_TPC 
-            && is_nSigma_Kaon_TPC && is_nSigma_Proton_TPC)
+        if(is_nSigma_Electron_TPC)
         {
           //QA histis filling after PID but after TPC only:
           hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
@@ -584,7 +590,6 @@ int main(int argc, char* argv[]) {
           hNSigmElectron_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaElectron());
           hdEdx_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,picoTrack->dEdx());
           //let's fill c++ vector of Pions after TPC only:
-          Double_t m_Pion = 0.13957039;//GeV
           Double_t temp_pion_Energy_TPC_ONLY = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
           My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(), 
                               picoTrack->pMom().Pz(), temp_pion_Energy_TPC_ONLY);
@@ -628,10 +633,11 @@ int main(int argc, char* argv[]) {
       hTEST_P2_pPrimTotDevQ->Fill(PtotPrimQ, picoTrack->pMom().Mag2());
 
       Bool_t is_nSigma_Pion = fabs(picoTrack->nSigmaPion())<nSigmaPion_max_TOF;
+      if(!is_nSigma_Pion) continue;
       Bool_t is_1_beta_delta = fabs(1./(trait->btofBeta())-one_beta_expect)<one_over_beta_delta_max;
+      if(!is_1_beta_delta) continue;
       Bool_t is_m2 = m2_min<m_square && m_square<m2_max;
-      if(is_nSigma_Pion && is_1_beta_delta 
-          && is_m2)
+      if(is_m2)
       {
         //QA hists filling after PID TPC+TOF cut:
         hNSigmPion_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ, picoTrack->nSigmaPion());
@@ -645,7 +651,6 @@ int main(int argc, char* argv[]) {
         hm2_vs_pPrimTotDevQ_cut_PID->Fill(PtotPrimQ,m_square);
         
         //let's fill c++ vector of Pions after TPC & TOF PID:
-        Double_t m_Pion = 0.13957039;//GeV
         Double_t temp_pion_Energy_TOF_TPC = sqrt(picoTrack->pMom().Mag2()+m_Pion*m_Pion);
         My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(),
                               picoTrack->pMom().Pz(), temp_pion_Energy_TOF_TPC);
