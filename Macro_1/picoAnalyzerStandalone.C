@@ -62,9 +62,11 @@ using My_LorenzVector = ROOT::Math::PxPyPzEVector;
 
 struct My_ParticleTrackInfo{
   My_LorenzVector p4;
+  UInt_t topologyMap0;
+  UInt_t topologyMap1;
+  ULong64_t iTpcTopologyMap;
   Int_t Nhits;
-  UInt_t trHits_1;
-  UInt_t trHits_2;
+  StPicoPhysicalHelix helix;
 };
 //Spliting level: 
 const double maxSplitLevel = 0.7;
@@ -88,8 +90,8 @@ const double maxSplitLevel = 0.7;
 //a&0xFFFFFF00 sets first 8 bits of a to 0
 double getSplitLevel(const My_ParticleTrackInfo& tr_1,const My_ParticleTrackInfo& tr_2)
 {
-  int minusOnes = __builtin_popcount( (tr_1.trHits_1&tr_2.trHits_1) & 0xFFFFFF00)+
-                     __builtin_popcount( (tr_1.trHits_2&tr_2.trHits_2) & 0x1FFFFF);
+  int minusOnes = __builtin_popcount( (tr_1.topologyMap0&tr_2.topologyMap0) & 0xFFFFFF00)+
+                     __builtin_popcount( (tr_1.topologyMap1&tr_2.topologyMap1) & 0x1FFFFF);
   int sumNhits = tr_1.Nhits+tr_2.Nhits;
   return(static_cast<double>(sumNhits - 3 * minusOnes) / sumNhits);
 }
@@ -594,15 +596,23 @@ int main(int argc, char* argv[]) {
           My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(), 
                               picoTrack->pMom().Pz(), temp_pion_Energy_TPC_ONLY);
 
+          My_ParticleTrackInfo temp_MyParticle;
+          temp_MyParticle.p4 = temp_four_vector;
+          temp_MyParticle.topologyMap0 = picoTrack->topologyMap(0);
+          temp_MyParticle.topologyMap1 = picoTrack->topologyMap(1);
+          temp_MyParticle.iTpcTopologyMap = picoTrack->iTpcTopologyMap();
+          temp_MyParticle.Nhits = picoTrack->nHits();
+          temp_MyParticle.helix = picoTrack->helix( event->bField() );
+
           //separation to Pi+Pi+ & Pi-Pi- pairs
           if(picoTrack->charge()>0.)
           {
             //let's fill
-            Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+            Pions_Plus_4_momenta_hits_Arr_ALL.push_back(temp_MyParticle);
           }
           else if(picoTrack->charge()<0.)
           {
-            Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(),picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+            Pions_Minus_4_momenta_hits_Arr_ALL.push_back(temp_MyParticle);
           }
         }
 
@@ -655,14 +665,22 @@ int main(int argc, char* argv[]) {
         My_LorenzVector temp_four_vector(picoTrack->pMom().Px(), picoTrack->pMom().Py(),
                               picoTrack->pMom().Pz(), temp_pion_Energy_TOF_TPC);
 
+          My_ParticleTrackInfo temp_MyParticle;
+          temp_MyParticle.p4 = temp_four_vector;
+          temp_MyParticle.topologyMap0 = picoTrack->topologyMap(0);
+          temp_MyParticle.topologyMap1 = picoTrack->topologyMap(1);
+          temp_MyParticle.iTpcTopologyMap = picoTrack->iTpcTopologyMap();
+          temp_MyParticle.Nhits = picoTrack->nHits();
+          temp_MyParticle.helix = picoTrack->helix( event->bField() );
+
         //separation to Pi+Pi+ & Pi-Pi- pairs
         if (picoTrack->charge() > 0.)
         {
-          Pions_Plus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+          Pions_Plus_4_momenta_hits_Arr_ALL.push_back(temp_MyParticle);
         }
         else if (picoTrack->charge() < 0.)
         {
-          Pions_Minus_4_momenta_hits_Arr_ALL.push_back({temp_four_vector,picoTrack->nHitsFit(), picoTrack->topologyMap(0),picoTrack->topologyMap(1)});
+          Pions_Minus_4_momenta_hits_Arr_ALL.push_back(temp_MyParticle);
         }
       }//end of PID
 
